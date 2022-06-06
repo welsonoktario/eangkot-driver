@@ -1,0 +1,9 @@
+{
+	"appId": "com.eangkot.driver",
+	"appName": "eAngkot Driver",
+	"webDir": "public",
+	"bundledWebRuntime": false,
+	"server": {
+		"cleartext": true
+	}
+}

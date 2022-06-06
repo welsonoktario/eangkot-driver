@@ -1,10 +1,13 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'app-driver',
-  webDir: 'dist',
-  bundledWebRuntime: false
+  appId: 'com.eangkot.driver',
+  appName: 'eAngkot Driver',
+  webDir: 'public',
+  bundledWebRuntime: false,
+  server: {
+    cleartext: true,
+  },
 };
 
 export default config;
