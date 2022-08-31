@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import { defineStore } from "pinia";
-import { Trayek } from "@/models";
+import { Trayek } from "@/types";
 import { get } from "@/utils/http";
 
 export const useTrayek = defineStore("trayek", {

@@ -4,26 +4,22 @@ import { keysToSnake } from "./bodySerializer";
 
 const API_URL = process.env.VUE_APP_API_URL;
 
-export const get = async (
-  endpoint: string,
-  headers: HttpHeaders = {
-    Accept: "application/json",
-  }
-) => {
+export const get = async (endpoint: string) => {
   const isAPI = !endpoint.includes("http");
   const url = isAPI ? API_URL + endpoint : endpoint;
-  let headers: { Authorization: string };
+  const headers = {
+    Accept: "application/json",
+  };
 
   if (isAPI) {
     const { value } = await Preferences.get({ key: "token" });
 
-    headers = Object.assign(
-      {},
-      !value && value === "null"
-        ? null
-        : {
-            Authorization: `Bearer ${value}`,
-          }
+    Object.assign(
+      headers,
+      !value &&
+        value !== "null" && {
+          Authorization: `Bearer ${value}`,
+        }
     );
   }
 
@@ -35,7 +31,13 @@ export const get = async (
   return await Http.get(options);
 };
 
-export const post = async (endpoint: string, payload: object) => {
+export const post = async (
+  endpoint: string,
+  payload: object,
+  headers: Record<string, string> = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  }
+) => {
   const isAPI = !endpoint.includes("http");
   const isChannel = endpoint.includes("broadcasting");
   const url = isAPI ? API_URL + endpoint : endpoint;
@@ -44,14 +46,11 @@ export const post = async (endpoint: string, payload: object) => {
   if (isAPI || isChannel) {
     const { value } = await Preferences.get({ key: "token" });
 
-    Object.assign(
-      headers,
-      !value && value === "null"
-        ? null
-        : {
-            Authorization: `Bearer ${value}`,
-          }
-    );
+    !value &&
+      value !== "null" &&
+      Object.assign(headers, {
+        Authorization: `Bearer ${value}`,
+      });
   }
 
   const options: HttpOptions = {
@@ -67,18 +66,18 @@ export const patch = async (endpoint: string, payload: object) => {
   const isAPI = !endpoint.includes("http");
   const url = isAPI ? API_URL + endpoint : endpoint;
   const data = keysToSnake(payload);
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
 
   if (isAPI) {
     const { value } = await Preferences.get({ key: "token" });
 
-    Object.assign(
-      headers,
-      !value && value === "null"
-        ? null
-        : {
-            Authorization: `Bearer ${value}`,
-          }
-    );
+    !value && value === "null"
+      ? null
+      : Object.assign(headers, {
+          Authorization: `Bearer ${value}`,
+        });
   }
 
   const options: HttpOptions = {

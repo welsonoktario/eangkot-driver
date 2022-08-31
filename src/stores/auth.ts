@@ -2,6 +2,7 @@ import { User } from "@/types/user";
 import { patch, post } from "@/utils/http";
 import { Preferences } from "@capacitor/preferences";
 import { defineStore } from "pinia";
+import { reactive } from "vue";
 
 type AuthState = {
   user: User | undefined;
@@ -61,25 +62,16 @@ export const useAuth = defineStore("auth", {
     async register(nama: string, phone: string) {
       return await post("auth/register", { nama, phone });
     },
-    async ubahProfil(data: object) {
-      return await patch(`user/${this.authUser.id}`, data);
-    },
-    async ubahPassword(data: object) {
-      return await patch(`user/${this.authUser.id}/ubah-password`, data);
-    },
     async pengajuanDriver(data: object) {
       return await post("driver", data, {
         "Content-Type": "multipart/form-data",
       });
     },
-    async statusPengajuan() {
-      return await get(`driver/${this.user.id}/status`);
+    async ubahProfil(data: object) {
+      return await patch(`user/${this.authUser.id}`, data);
     },
-    async updatePengajuan(data: object) {
-      this.user.pengajuan = data;
-
-      await Storage.remove({ key: "user" });
-      await Storage.set({ key: "user", value: this.user });
+    async ubahPassword(data: object) {
+      return await patch(`user/${this.authUser.id}/ubah-password`, data);
     },
     async logout() {
       this.user = undefined;

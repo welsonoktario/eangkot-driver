@@ -40,7 +40,7 @@
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import { useAuth } from "@/stores/auth";
-import { User } from "@/models/user";
+import { User } from "@/types/user";
 import {
   IonButton,
   IonButtons,

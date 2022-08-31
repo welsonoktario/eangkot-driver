@@ -1,3 +1,3 @@
-export interface Driver {
-  id: number
-}
+export type Driver = {
+  id: number;
+};
