@@ -1,15 +1,17 @@
-import { Http, HttpOptions } from "@capacitor-community/http";
+import { Http, HttpHeaders, HttpOptions } from "@capacitor-community/http";
 import { Storage } from "@capacitor/storage";
 import { keysToCamel, keysToSnake } from "./bodySerializer";
 
 const API_URL = process.env.VUE_APP_API_URL;
 
-export const get = async (endpoint: string) => {
+export const get = async (
+  endpoint: string,
+  headers: HttpHeaders = {
+    Accept: "application/json",
+  }
+) => {
   const isAPI = !endpoint.includes("http") && !endpoint.includes("auth");
   const url = isAPI ? API_URL + endpoint : endpoint;
-  const headers = {
-    Accept: "application/json",
-  };
 
   if (isAPI) {
     const { value } = await Storage.get({ key: "token" });
@@ -35,14 +37,17 @@ export const get = async (endpoint: string) => {
   return res;
 };
 
-export const post = async (endpoint: string, payload: object) => {
+export const post = async (
+  endpoint: string,
+  payload: object,
+  headers: HttpHeaders = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  }
+) => {
   const isAPI = !endpoint.includes("http") && !endpoint.includes("auth");
   const isChannel = endpoint.includes("broadcasting");
   const url = isAPI ? API_URL + endpoint : endpoint;
   const data = keysToSnake(payload);
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-  };
 
   if (isAPI || isChannel) {
     const { value } = await Storage.get({ key: "token" });
@@ -69,13 +74,16 @@ export const post = async (endpoint: string, payload: object) => {
   return res;
 };
 
-export const patch = async (endpoint: string, payload: object) => {
+export const patch = async (
+  endpoint: string,
+  payload: object,
+  headers: HttpHeaders = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  }
+) => {
   const isAPI = !endpoint.includes("http") && !endpoint.includes("auth");
   const url = isAPI ? API_URL + endpoint : endpoint;
   const data = keysToSnake(payload);
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-  };
 
   if (isAPI) {
     const { value } = await Storage.get({ key: "token" });

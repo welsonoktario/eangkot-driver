@@ -1,7 +1,8 @@
+import { reactive } from "vue";
 import { User } from "@/models/user";
 import { defineStore } from "pinia";
 import { Storage } from "@capacitor/storage";
-import { patch, post } from "@/utils/http";
+import { get, patch, post } from "@/utils/http";
 
 type AuthState = {
   user: User | undefined;
@@ -10,7 +11,7 @@ type AuthState = {
 
 export const useAuth = defineStore("auth", {
   state: () =>
-    ({
+    reactive({
       user: undefined,
       token: undefined,
     } as AuthState),
@@ -53,19 +54,41 @@ export const useAuth = defineStore("auth", {
       return await post(`${process.env.VUE_APP_API_URL}auth/login`, { phone });
     },
     async requestOTP(phone: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/request-otp`, { phone });
+      return await post(`${process.env.VUE_APP_API_URL}auth/request-otp`, {
+        phone,
+      });
     },
     async checkOTP(phone: string, pin: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/check-otp`, { phone, pin });
+      return await post(`${process.env.VUE_APP_API_URL}auth/check-otp`, {
+        phone,
+        pin,
+      });
     },
     async register(nama: string, phone: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/register`, { nama, phone });
+      return await post(`${process.env.VUE_APP_API_URL}auth/register`, {
+        nama,
+        phone,
+      });
     },
     async ubahProfil(data: object) {
       return await patch(`user/${this.authUser.id}`, data);
     },
     async ubahPassword(data: object) {
       return await patch(`user/${this.authUser.id}/ubah-password`, data);
+    },
+    async pengajuanDriver(data: object) {
+      return await post("driver", data, {
+        "Content-Type": "multipart/form-data",
+      });
+    },
+    async statusPengajuan() {
+      return await get(`driver/${this.user.id}/status`);
+    },
+    async updatePengajuan(data: object) {
+      this.user.pengajuan = data;
+
+      await Storage.remove({ key: "user" });
+      await Storage.set({ key: "user", value: this.user });
     },
     async logout() {
       this.user = undefined;
