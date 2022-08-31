@@ -1,8 +1,5 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import VueVirtualScroller from "vue-virtual-scroller";
 import App from "./App.vue";
 import router from "./router";
 
@@ -34,9 +31,7 @@ const app = createApp(App)
   .use(IonicVue)
   .use(router)
   .use(createPinia())
-  .use(VueVirtualScroller);
-
-app.provide("pusher", createEcho);
+  .provide("pusher", createEcho);
 
 router.isReady().then(() => {
   app.mount("#app");

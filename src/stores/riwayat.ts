@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import { Transaksi, Ulasan } from "@/models";
+import { Transaksi, Ulasan } from "@/types";
 import { get, patch } from "@/utils/http";
 
 export const useRiwayat = defineStore("riwayat", {

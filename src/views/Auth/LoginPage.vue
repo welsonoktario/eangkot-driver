@@ -4,7 +4,7 @@
       <IonGrid style="height: 100%" class="ion-padding-bottom">
         <IonRow style="height: 50%">
           <IonCol>
-            <h1 class="ion-text-center">eAngkot</h1>
+            <h1 class="ion-text-center font-bold">eAngkot Driver</h1>
           </IonCol>
         </IonRow>
         <IonRow
@@ -50,7 +50,7 @@ import {
   useIonRouter,
 } from "@ionic/vue";
 import { useAuth } from "@/stores/auth";
-import { User } from "@/models/user";
+import { User } from "@/types/user";
 import AppLayout from "@/layouts/AppLayout.vue";
 import ModalOtp from "@/components/Auth/ModalOtp.vue";
 
@@ -122,5 +122,9 @@ ion-spinner {
   height: 28px;
   stroke: #444;
   fill: #222;
+}
+
+.font-bold {
+  font-weight: 700;
 }
 </style>

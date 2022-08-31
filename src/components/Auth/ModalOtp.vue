@@ -35,21 +35,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from "vue";
-import { $ref } from "vue/macros";
+import AppLayout from "@/layouts/AppLayout.vue";
 import { useAuth } from "@/stores";
+import { Dialog } from "@capacitor/dialog";
 import {
+  IonButton,
+  IonButtons,
+  IonIcon,
   IonLabel,
   IonTitle,
   IonToolbar,
-  IonButtons,
-  IonButton,
-  IonIcon,
   modalController,
 } from "@ionic/vue";
-import { Dialog } from "@capacitor/dialog";
 import { arrowBack } from "ionicons/icons";
-import AppLayout from "@/layouts/AppLayout.vue";
+import { onMounted, ref } from "vue";
 import VOtpInput from "vue3-otp-input";
 
 const auth = useAuth();
@@ -61,12 +60,12 @@ const props = defineProps({
   },
 });
 
-let pin = $ref("");
+const pin = ref("");
 
 onMounted(() => requestOtp());
 
 const handleOnComplete = (value: string) => {
-  pin = value;
+  pin.value = value;
 };
 
 const closeModal = (data: any) => modalController.dismiss(data);
@@ -74,7 +73,7 @@ const closeModal = (data: any) => modalController.dismiss(data);
 const requestOtp = async () => await auth.requestOTP(props.phone);
 
 const checkOtp = async () => {
-  const res = await auth.checkOTP(props.phone, pin);
+  const res = await auth.checkOTP(props.phone, pin.value);
   const data = await res.data;
 
   if (data.msg) {

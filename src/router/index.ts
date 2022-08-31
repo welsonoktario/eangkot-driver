@@ -1,13 +1,13 @@
-import { createRouter, createWebHistory } from "@ionic/vue-router";
-import { RouteRecordRaw } from "vue-router";
 import { useAuth } from "@/stores";
 import AuthPage from "@/views/Auth/AuthPage.vue";
 import TabsPage from "@/views/TabsPage.vue";
+import { createRouter, createWebHistory } from "@ionic/vue-router";
+import { RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/tabs/home",
+    redirect: "/tabs",
   },
   {
     path: "/tabs/",
@@ -20,17 +20,22 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "home",
         name: "tabs.home",
-        component: () => import("@/views/HomePage.vue"),
+        component: () => import("@/views/Tabs/HomePage.vue"),
       },
       {
-        path: "penghasilan",
-        name: "tabs.penghasilan",
-        component: () => import("@/views/PenghasilanPage.vue"),
+        path: "statistik",
+        name: "tabs.statistik",
+        component: () => import("@/views/Tabs/StatistikPage.vue"),
       },
       {
         path: "angkot",
         name: "tabs.angkot",
-        component: () => import("@/views/AngkotPage.vue"),
+        component: () => import("@/views/Tabs/AngkotPage.vue"),
+      },
+      {
+        path: "akun",
+        name: "tabs.akun",
+        component: () => import("@/views/Tabs/AkunPage.vue"),
       },
     ],
   },
@@ -41,6 +46,7 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "",
+        name: "auth.redirect",
         redirect: "/auth/login",
       },
       {
@@ -52,11 +58,6 @@ const routes: Array<RouteRecordRaw> = [
         path: "register/:phone",
         name: "auth.register",
         component: () => import("@/views/Auth/RegisterPage.vue"),
-      },
-      {
-        path: "pengajuan",
-        name: "auth.pengajuan",
-        component: () => import("@/views/Auth/PengajuanPage.vue"),
       },
     ],
   },

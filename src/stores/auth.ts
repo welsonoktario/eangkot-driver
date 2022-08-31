@@ -1,8 +1,7 @@
-import { reactive } from "vue";
-import { User } from "@/models/user";
+import { User } from "@/types/user";
+import { patch, post } from "@/utils/http";
+import { Preferences } from "@capacitor/preferences";
 import { defineStore } from "pinia";
-import { Storage } from "@capacitor/storage";
-import { get, patch, post } from "@/utils/http";
 
 type AuthState = {
   user: User | undefined;
@@ -23,18 +22,18 @@ export const useAuth = defineStore("auth", {
     async setAuthUser(user: User, token: string = null) {
       this.user = user;
 
-      await Storage.remove({ key: "user" });
-      await Storage.set({ key: "user", value: JSON.stringify(user) });
+      await Preferences.remove({ key: "user" });
+      await Preferences.set({ key: "user", value: JSON.stringify(user) });
 
       if (token) {
-        await Storage.remove({ key: "token" });
+        await Preferences.remove({ key: "token" });
         this.token = token;
-        await Storage.set({ key: "token", value: token });
+        await Preferences.set({ key: "token", value: token });
       }
     },
     async checkAuth() {
-      const user = await Storage.get({ key: "user" });
-      const token = await Storage.get({ key: "token" });
+      const user = await Preferences.get({ key: "user" });
+      const token = await Preferences.get({ key: "token" });
 
       if (
         user.value &&
@@ -51,24 +50,16 @@ export const useAuth = defineStore("auth", {
       return false;
     },
     async login(phone: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/login`, { phone });
+      return await post("auth/login", { phone, driver: true });
     },
     async requestOTP(phone: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/request-otp`, {
-        phone,
-      });
+      return await post("auth/request-otp", { phone });
     },
     async checkOTP(phone: string, pin: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/check-otp`, {
-        phone,
-        pin,
-      });
+      return await post("auth/check-otp", { phone, pin });
     },
     async register(nama: string, phone: string) {
-      return await post(`${process.env.VUE_APP_API_URL}auth/register`, {
-        nama,
-        phone,
-      });
+      return await post("auth/register", { nama, phone });
     },
     async ubahProfil(data: object) {
       return await patch(`user/${this.authUser.id}`, data);
@@ -93,7 +84,7 @@ export const useAuth = defineStore("auth", {
     async logout() {
       this.user = undefined;
       this.token = undefined;
-      await Storage.clear();
+      await Preferences.clear();
     },
   },
 });
