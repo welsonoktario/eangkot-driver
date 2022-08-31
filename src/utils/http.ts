@@ -1,21 +1,19 @@
 import { Http, HttpOptions } from "@capacitor-community/http";
-import { Storage } from "@capacitor/storage";
-import { keysToCamel, keysToSnake } from "./bodySerializer";
+import { Preferences } from "@capacitor/preferences";
+import { keysToSnake } from "./bodySerializer";
 
 const API_URL = process.env.VUE_APP_API_URL;
 
 export const get = async (endpoint: string) => {
-  const isAPI = !endpoint.includes("http") && !endpoint.includes("auth");
+  const isAPI = !endpoint.includes("http");
   const url = isAPI ? API_URL + endpoint : endpoint;
-  const headers = {
-    Accept: "application/json",
-  };
+  let headers: { Authorization: string };
 
   if (isAPI) {
-    const { value } = await Storage.get({ key: "token" });
+    const { value } = await Preferences.get({ key: "token" });
 
-    Object.assign(
-      headers,
+    headers = Object.assign(
+      {},
       !value && value === "null"
         ? null
         : {
@@ -29,14 +27,11 @@ export const get = async (endpoint: string) => {
     headers,
   };
 
-  const res = await Http.get(options);
-  res.data = keysToCamel(res.data);
-
-  return res;
+  return await Http.get(options);
 };
 
 export const post = async (endpoint: string, payload: object) => {
-  const isAPI = !endpoint.includes("http") && !endpoint.includes("auth");
+  const isAPI = !endpoint.includes("http");
   const isChannel = endpoint.includes("broadcasting");
   const url = isAPI ? API_URL + endpoint : endpoint;
   const data = keysToSnake(payload);
@@ -45,7 +40,7 @@ export const post = async (endpoint: string, payload: object) => {
   };
 
   if (isAPI || isChannel) {
-    const { value } = await Storage.get({ key: "token" });
+    const { value } = await Preferences.get({ key: "token" });
 
     Object.assign(
       headers,
@@ -63,14 +58,11 @@ export const post = async (endpoint: string, payload: object) => {
     headers,
   };
 
-  const res = await Http.post(options);
-  res.data = keysToCamel(res.data);
-
-  return res;
+  return await Http.post(options);
 };
 
 export const patch = async (endpoint: string, payload: object) => {
-  const isAPI = !endpoint.includes("http") && !endpoint.includes("auth");
+  const isAPI = !endpoint.includes("http");
   const url = isAPI ? API_URL + endpoint : endpoint;
   const data = keysToSnake(payload);
   const headers = {
@@ -78,7 +70,7 @@ export const patch = async (endpoint: string, payload: object) => {
   };
 
   if (isAPI) {
-    const { value } = await Storage.get({ key: "token" });
+    const { value } = await Preferences.get({ key: "token" });
 
     Object.assign(
       headers,
@@ -96,8 +88,5 @@ export const patch = async (endpoint: string, payload: object) => {
     headers,
   };
 
-  const res = await Http.patch(options);
-  res.data = keysToCamel(res.data);
-
-  return res;
+  return await Http.patch(options);
 };

@@ -1,7 +1,7 @@
-export interface User {
+export type User = {
   id: number;
   nama: string;
   noHp: string;
   email?: string;
-  secure: boolean;
-}
+  hasPassword: boolean;
+};
