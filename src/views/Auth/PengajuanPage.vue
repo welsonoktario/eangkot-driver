@@ -1,90 +1,102 @@
 <template>
-  <AppLayout>
-    <IonGrid style="height: 100%" class="ion-margin-horizontal" v-if="terkirim">
-      <IonRow
+  <app-layout>
+    <ion-grid
+      style="height: 100%"
+      class="ion-margin-horizontal"
+      v-if="terkirim"
+    >
+      <ion-row
         style="height: 100%"
         class="ion-justify-content-center ion-align-items-center"
       >
-        <IonCol>
-          <IonIcon
+        <ion-col>
+          <ion-icon
             :name="checkmarkCircle"
             size="large"
             color="primary"
-          ></IonIcon>
+          ></ion-icon>
           <p>
             Pengajuan berhasil dikirim. Proses pengajuan akan diproses selama
             maksimal 3x24 jam.
           </p>
-        </IonCol>
-      </IonRow>
-    </IonGrid>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 
     <template v-else>
       <form @submit.prevent="kirim()">
-        <IonList>
-          <IonItem>
-            <IonLabel position="floating">Alamat Lengkap</IonLabel>
-            <IonInput
+        <ion-list>
+          <ion-item>
+            <ion-label position="floating">Alamat Lengkap</ion-label>
+            <ion-input
               v-model="form.alamat"
               type="text"
               autocomplete="street-address"
-            ></IonInput>
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">NIK KTP (16 angka)</IonLabel>
-            <IonInput required v-model="form.nik" type="tel"></IonInput>
-          </IonItem>
-          <IonItem>
-            <IonLabel position="floating">Trayek Pilihan</IonLabel>
-            <IonSelect v-model="form.trayek">
-              <IonSelectOption
+            ></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">NIK KTP (16 angka)</ion-label>
+            <ion-input required v-model="form.nik" type="tel"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Trayek Pilihan</ion-label>
+            <ion-select v-model="form.trayek">
+              <ion-select-option
                 v-for="t in trayek.trayeks"
                 :key="t.id"
                 :value="t.kode"
-                >{{ t.kode }}</IonSelectOption
+                >{{ t.kode }}</ion-select-option
               >
-            </IonSelect>
-          </IonItem>
+            </ion-select>
+          </ion-item>
           <div class="ion-margin-vertical">
-            <IonItem class="ion-margin-top">
-              <IonLabel position="stack">Foto KTP</IonLabel>
+            <ion-item class="ion-margin-top">
+              <ion-label position="stacked">Foto KTP</ion-label>
               <div>
-                <img v-if="display.ktp" :src="display.ktp" width="200" />
-                <IonButton
+                <img
+                  v-if="detail.ktp.webPath"
+                  :src="detail.ktp.webPath"
+                  width="200"
+                />
+                <ion-button
                   @click="takePhoto('ktp')"
                   expand="block"
                   fill="clear"
                 >
                   Ambil foto
-                </IonButton>
+                </ion-button>
               </div>
-            </IonItem>
-            <IonItem class="ion-margin-top">
-              <IonLabel position="stack">Foto SIM</IonLabel>
+            </ion-item>
+            <ion-item class="ion-margin-top">
+              <ion-label position="stacked">Foto SIM</ion-label>
               <div>
-                <img v-if="display.sim" :src="display.sim" width="200" />
-                <IonButton
+                <img
+                  v-if="detail.sim.webPath"
+                  :src="detail.sim.webPath"
+                  width="200"
+                />
+                <ion-button
                   @click="takePhoto('sim')"
                   expand="block"
                   fill="clear"
                 >
                   Ambil foto
-                </IonButton>
+                </ion-button>
               </div>
-            </IonItem>
+            </ion-item>
           </div>
-          <IonButton
+          <ion-button
             class="ion-margin-top ion-margin-horizontal"
             expand="block"
             color="primary"
             type="submit"
           >
             Kirim
-          </IonButton>
-        </IonList>
+          </ion-button>
+        </ion-list>
       </form>
     </template>
-  </AppLayout>
+  </app-layout>
 </template>
 
 <script lang="ts" setup>
@@ -106,72 +118,75 @@ import {
   IonButton,
 } from "@ionic/vue";
 import { checkmarkCircle } from "ionicons/icons";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import Http from "cordova-plugin-advanced-http";
 import AppLayout from "@/layouts/AppLayout.vue";
 
 const auth = useAuth();
 const trayek = useTrayek();
+const detail = ref({
+  ktp: {
+    filePath: "",
+    webPath: "",
+  },
+  sim: {
+    filePath: "",
+    webPath: "",
+  },
+});
 const form = reactive({
   alamat: "",
   nik: "",
   trayek: "",
 });
 const terkirim = ref(false);
-const display = ref({
-  ktp: "",
-  sim: "",
-});
-const detail = ref({
-  ktp: {
-    blob: null,
-    format: "",
-  },
-  sim: {
-    blob: null,
-    format: "",
-  },
-});
 type PhotoType = "ktp" | "sim";
 
 onMounted(async () => await trayek.loadTrayeks());
 
 const takePhoto = async (type: PhotoType) => {
-  const image = await Camera.getPhoto({
+  const img = await Camera.getPhoto({
     quality: 40,
     allowEditing: true,
     source: CameraSource.Camera,
-    resultType: CameraResultType.Base64,
+    resultType: CameraResultType.Uri,
   });
 
-  detail.value[type].blob = await b64toBlob(image.base64String, image.format);
-  detail.value[type].format = image.format;
-  display.value[
-    type
-  ] = `data:image/${image.format};base64,${image.base64String}`;
+  detail.value[type].webPath = img.webPath;
+  detail.value[type].filePath = img.path;
 };
 
 const kirim = async () => {
-  const formData = new FormData();
-  formData.append("alamat", form.alamat);
-  formData.append("nik", form.nik);
-  formData.append("trayek", form.trayek);
-  formData.append("foto_ktp", detail.value.ktp.blob);
-  formData.append("format_ktp", detail.value.ktp.format);
-  formData.append("foto_sim", detail.value.sim.blob);
-  formData.append("format_sim", detail.value.sim.format);
- 
-  const res = await auth.pengajuanDriver(formData);
-  const data = await res.data;
-
-  if (data.status === "OK") {
-    terkirim.value = true;
-  } else if (data.status === "FAIL") {
-    await Dialog.alert({
-      title: "Error",
-      message: data.msg,
-    });
-  }
+  const url = process.env.VUE_APP_API_URL;
+  const filePaths = [detail.value.ktp.filePath, detail.value.sim.filePath];
+  const names = ["ktp", "sim"];
+  
+  Http.uploadFile(
+    url,
+    filePaths,
+    names,
+    {
+      Authorization: auth.authToken,
+    },
+    async (res: any) => {
+      console.log(res);
+      const data = res.data;
+      if (data.status === "OK") {
+        terkirim.value = true;
+      } else if (data.status === "FAIL") {
+        await Dialog.alert({
+          title: "Error",
+          message: data.msg,
+        });
+      }
+    },
+    async (err: any) => {
+      await Dialog.alert({
+        title: "Error",
+        message: err.data.msg,
+      });
+    }
+  );
 };
-
-const b64toBlob = async (base64: string, format: string) =>
-  await (await fetch(`data:image/${format};base64,${base64}`)).blob();
 </script>

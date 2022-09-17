@@ -1,5 +1,6 @@
 import { User } from "@/types/user";
-import { patch, post } from "@/utils/http";
+import { patch, post, upload } from "@/utils/http";
+import { Http } from "@capacitor-community/http";
 import { Preferences } from "@capacitor/preferences";
 import { defineStore } from "pinia";
 import { reactive } from "vue";
@@ -61,11 +62,6 @@ export const useAuth = defineStore("auth", {
     },
     async register(nama: string, phone: string) {
       return await post("auth/register", { nama, phone });
-    },
-    async pengajuanDriver(data: object) {
-      return await post("driver", data, {
-        "Content-Type": "multipart/form-data",
-      });
     },
     async ubahProfil(data: object) {
       return await patch(`user/${this.authUser.id}`, data);
