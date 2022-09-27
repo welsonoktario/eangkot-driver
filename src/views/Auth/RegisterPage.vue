@@ -1,9 +1,9 @@
 <template>
   <app-layout>
     <template #header>
-      <ion-buttons slot="start">
+      <e-a-buttons slot="start">
         <ion-back-button></ion-back-button>
-      </ion-buttons>
+      </e-a-buttons>
 
       <ion-title>Register</ion-title>
     </template>
@@ -23,7 +23,7 @@
     </template>
 
     <template #footer>
-      <ion-button
+      <e-a-button
         @click="register()"
         class="ion-margin"
         expand="block"
@@ -31,7 +31,7 @@
         :disabled="nama ? false : true"
       >
         Daftar
-      </ion-button>
+      </e-a-button>
     </template>
   </app-layout>
 </template>
@@ -42,8 +42,6 @@ import { useRoute } from "vue-router";
 import { useAuth } from "@/stores/auth";
 import { User } from "@/types/user";
 import {
-  IonButton,
-  IonButtons,
   IonBackButton,
   IonTitle,
   IonList,
@@ -53,6 +51,7 @@ import {
   useIonRouter,
 } from "@ionic/vue";
 import AppLayout from "@/layouts/AppLayout.vue";
+import EAButton from "@/components/EAButton.vue";
 
 const route = useRoute();
 const ionRouter = useIonRouter();

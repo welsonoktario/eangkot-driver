@@ -1,58 +1,59 @@
 <template>
-  <AppLayout :fullscreen="true">
+  <app-layout>
     <template #content>
-      <IonGrid style="height: 100%" class="ion-padding-bottom">
-        <IonRow style="height: 50%">
-          <IonCol>
-            <h1 class="ion-text-center font-bold">eAngkot Driver</h1>
-          </IonCol>
-        </IonRow>
-        <IonRow
+      <ion-grid style="height: 100%" class="ion-padding-bottom">
+        <ion-row style="height: 50%">
+          <ion-col>
+            <h1 class="ion-text-center font-bold font-serif">eAngkot Driver</h1>
+          </ion-col>
+        </ion-row>
+        <ion-row
           class="ion-align-items-end ion-padding-horizontal"
           style="height: 50%"
         >
-          <IonCol>
-            <IonList lines="full">
+          <ion-col>
+            <ion-list lines="full">
               <form class="ion-margin-horizontal" @submit.prevent="otp()">
-                <IonItem>
-                  <IonLabel position="floating">No. HP</IonLabel>
-                  <IonInput required v-model="phone" type="tel"></IonInput>
-                </IonItem>
-                <IonButton
+                <ion-item>
+                  <ion-label position="floating">No. HP</ion-label>
+                  <ion-input required v-model="phone" type="tel"></ion-input>
+                </ion-item>
+
+                <e-a-button
                   class="ion-margin-vertical"
                   expand="block"
                   color="primary"
                   type="submit"
                 >
                   Mulai
-                </IonButton>
+                </e-a-button>
               </form>
-            </IonList>
-          </IonCol>
-        </IonRow>
-      </IonGrid>
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </template>
-  </AppLayout>
+  </app-layout>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import ModalOtp from "@/components/Auth/ModalOtp.vue";
+import EAButton from "@/components/EAButton.vue";
+import AppLayout from "@/layouts/AppLayout.vue";
+import { useAuth } from "@/stores/auth";
+import { User } from "@/types/user";
 import {
-  IonGrid,
-  IonRow,
   IonCol,
-  IonList,
-  IonButton,
+  IonGrid,
+  IonInput,
   IonItem,
   IonLabel,
-  IonInput,
+  IonList,
+  IonRow,
   modalController,
   useIonRouter,
 } from "@ionic/vue";
-import { useAuth } from "@/stores/auth";
-import { User } from "@/types/user";
-import AppLayout from "@/layouts/AppLayout.vue";
-import ModalOtp from "@/components/Auth/ModalOtp.vue";
+import { ref } from "vue";
 
 const ionRouter = useIonRouter();
 const auth = useAuth();
@@ -79,7 +80,9 @@ const login = async () => {
     await auth.setAuthUser(data.data.user as User, data.data.token);
 
     ionRouter.push("/tabs/home");
-  } else if (data.msg === "REGISTER") {
+  }
+
+  if (data.msg === "REGISTER") {
     ionRouter.push(`/auth/register/${phone.value}`);
   }
 };
@@ -108,20 +111,6 @@ const otp = async () => {
   display: flex;
   height: 100%;
   vertical-align: middle;
-}
-
-.spin {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-ion-spinner {
-  width: 28px;
-  height: 28px;
-  stroke: #444;
-  fill: #222;
 }
 
 .font-bold {

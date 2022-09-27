@@ -1,60 +1,60 @@
 <template>
-  <AppLayout title="Akun" :largeTitle="true">
+  <app-layout title="Akun" :largeTitle="true">
     <template #content>
-      <IonItem class="ion-padding-vertical" lines="none">
-        <IonLabel v-if="auth.authUser" class="ion-text-center">
+      <ion-item class="ion-padding-vertical" lines="none">
+        <ion-label v-if="auth.authUser" class="ion-text-center">
           <h1>{{ auth.authUser.nama }}</h1>
           <p v-if="auth.authUser.email">{{ auth.authUser.email }}</p>
           <p>{{ auth.authUser.noHp }}</p>
-        </IonLabel>
-      </IonItem>
+        </ion-label>
+      </ion-item>
 
-      <IonList lines="full">
-        <IonItem
+      <ion-list lines="full">
+        <ion-item
           routerLink="/tabs/riwayat"
           routerDirection="root"
           button
           detail
         >
-          <IonIcon slot="start" :md="time" :ios="timeOutline"></IonIcon>
-          <IonLabel>Riwayat perjalanan</IonLabel>
-        </IonItem>
-        <IonItem @click="profil()" button detail>
-          <IonIcon slot="start" :md="person" :ios="personOutline"></IonIcon>
-          <IonLabel>Ubah profil</IonLabel>
-        </IonItem>
-        <IonItem @click="password()" button detail>
-          <IonIcon slot="start" :md="key" :ios="keyOutline"></IonIcon>
-          <IonLabel>{{
+          <ion-icon slot="start" :md="time" :ios="timeOutline"></ion-icon>
+          <ion-label>Riwayat perjalanan</ion-label>
+        </ion-item>
+        <ion-item @click="profil()" button detail>
+          <ion-icon slot="start" :md="person" :ios="personOutline"></ion-icon>
+          <ion-label>Ubah profil</ion-label>
+        </ion-item>
+        <ion-item @click="password()" button detail>
+          <ion-icon slot="start" :md="key" :ios="keyOutline"></ion-icon>
+          <ion-label>{{
             auth.authUser?.hasPassword ? "Ubah password" : "Tambah password"
-          }}</IonLabel>
-        </IonItem>
-        <IonItem @click="share()" button detail>
-          <IonIcon slot="start" :md="people" :ios="peopleOutline"></IonIcon>
-          <IonLabel>Bagikan eAngkot</IonLabel>
-        </IonItem>
-        <IonItem button detail>
-          <IonIcon slot="start" :md="help" :ios="helpCircleOutline"></IonIcon>
-          <IonLabel>Bantuan</IonLabel>
-        </IonItem>
-      </IonList>
-      <IonItem
+          }}</ion-label>
+        </ion-item>
+        <ion-item @click="share()" button detail>
+          <ion-icon slot="start" :md="people" :ios="peopleOutline"></ion-icon>
+          <ion-label>Bagikan eAngkot</ion-label>
+        </ion-item>
+        <ion-item button detail>
+          <ion-icon slot="start" :md="help" :ios="helpCircleOutline"></ion-icon>
+          <ion-label>Bantuan</ion-label>
+        </ion-item>
+      </ion-list>
+      <ion-item
         @click="logout()"
         lines="none"
         class="ion-margin-top"
         button
         detail
       >
-        <IonIcon
+        <ion-icon
           slot="start"
           :md="logOut"
           :ios="logOutOutline"
           color="danger"
-        ></IonIcon>
-        <IonLabel color="danger">Keluar</IonLabel>
-      </IonItem>
+        ></ion-icon>
+        <ion-label color="danger">Keluar</ion-label>
+      </ion-item>
     </template>
-  </AppLayout>
+  </app-layout>
 </template>
 
 <script lang="ts" setup>

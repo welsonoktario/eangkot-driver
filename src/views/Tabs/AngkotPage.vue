@@ -12,7 +12,7 @@
         </ion-toolbar>
       </ion-header>
 
-      <ExploreContainer name="Angkot page" />
+      <explore-container name="Angkot page" />
     </ion-content>
   </ion-page>
 </template>

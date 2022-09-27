@@ -1,54 +1,34 @@
 <template>
-  <IonPage>
-    <IonHeader
-      v-if="!fullscreen"
-      :collapse="largeTitle ? 'fade' : null"
-      :translucent="largeTitle"
+  <ion-page>
+    <ion-header
+      class="ion-no-border"
+      :class="{ 'bg-transparent': transparent }"
     >
-      <IonToolbar>
-        <slot name="header">
-          <IonTitle> {{ title }} </IonTitle>
-        </slot>
-      </IonToolbar>
-    </IonHeader>
+      <slot name="header"> </slot>
+    </ion-header>
 
-    <IonContent>
-      <IonHeader v-if="largeTitle" collapse="condense">
-        <IonToolbar>
-          <IonTitle size="large">{{ title }}</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-
+    <ion-content>
       <slot name="content"></slot>
-    </IonContent>
+    </ion-content>
 
-    <IonFooter v-if="slots['footer']">
+    <ion-footer v-if="slots['footer']">
       <slot name="footer"></slot>
-    </IonFooter>
-  </IonPage>
+    </ion-footer>
+  </ion-page>
 </template>
 
 <script lang="ts" setup>
+import { IonContent, IonFooter, IonHeader, IonPage } from "@ionic/vue";
 import { useSlots } from "vue";
-import {
-  IonPage,
-  IonContent,
-  IonHeader,
-  IonFooter,
-  IonToolbar,
-  IonTitle,
-} from "@ionic/vue";
 
 defineProps({
-  title: String,
-  largeTitle: Boolean,
-  fullscreen: Boolean,
+  transparent: Boolean,
 });
 
 const slots = useSlots();
 </script>
 
-<style>
+<style lang="scss">
 .md ion-toolbar {
   --ion-background-color: var(--ion-color-primary);
 }
@@ -67,5 +47,39 @@ const slots = useSlots();
 
 .md ion-toolbar ion-buttons ion-back-button {
   --color: var(--ion-color-primary-contrast) !important;
+}
+
+ion-header.bg-transparent {
+  background: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  .app-bar {
+    background: transparent;
+
+    .app-bar-start > ion-back-button {
+      --background: #fff;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-header.bg-transparent {
+    background: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    .app-bar {
+      background: transparent;
+
+      .app-bar-start > ion-back-button {
+        --background: #212121;
+      }
+    }
+  }
 }
 </style>

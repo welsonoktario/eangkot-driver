@@ -1,6 +1,5 @@
 import { User } from "@/types/user";
-import { patch, post, upload } from "@/utils/http";
-import { Http } from "@capacitor-community/http";
+import { patch, post } from "@/utils/http";
 import { Preferences } from "@capacitor/preferences";
 import { defineStore } from "pinia";
 import { reactive } from "vue";

@@ -3,9 +3,9 @@
     <template #header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button @click="closeModal(null)">
+          <e-a-button @click="closeModal(null)">
             <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
-          </ion-button>
+          </e-a-button>
         </ion-buttons>
         <ion-title>OTP</ion-title>
       </ion-toolbar>
@@ -27,9 +27,9 @@
     </template>
 
     <template #footer>
-      <ion-button @click="checkOtp()" class="ion-margin" expand="block">
+      <e-a-button @click="checkOtp()" class="ion-margin" expand="block">
         Lanjut
-      </ion-button>
+      </e-a-button>
     </template>
   </app-layout>
 </template>
@@ -39,7 +39,6 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import { useAuth } from "@/stores";
 import { Dialog } from "@capacitor/dialog";
 import {
-  IonButton,
   IonButtons,
   IonIcon,
   IonLabel,
@@ -50,6 +49,7 @@ import {
 import { arrowBack } from "ionicons/icons";
 import { onMounted, ref } from "vue";
 import VOtpInput from "vue3-otp-input";
+import EAButton from "@/components/EAButton.vue";
 
 const auth = useAuth();
 

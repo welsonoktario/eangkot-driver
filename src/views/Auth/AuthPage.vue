@@ -1,7 +1,7 @@
 <template>
-  <IonPage>
-    <IonRouterOutlet></IonRouterOutlet>
-  </IonPage>
+  <ion-page>
+    <ion-router-outlet></ion-router-outlet>
+  </ion-page>
 </template>
 
 <script lang="ts" setup>

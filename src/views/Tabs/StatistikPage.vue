@@ -12,7 +12,7 @@
         </ion-toolbar>
       </ion-header>
 
-      <ExploreContainer name="Statistik page" />
+      <explore-container name="Statistik page" />
     </ion-content>
   </ion-page>
 </template>

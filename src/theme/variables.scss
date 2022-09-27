@@ -1,15 +1,18 @@
 /* Ionic Variables and Theming. For more info, please see:
 http://ionicframework.com/docs/theming/ */
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Serif:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700;8..144,800&display=swap');
+
 /** Ionic CSS Variables **/
 :root {
   /** primary **/
-  --ion-color-primary: #304ffe;
-  --ion-color-primary-rgb: 48, 79, 254;
+  --ion-color-primary: #245652;
+  --ion-color-primary-rgb: 36, 86, 82;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #2a46e0;
-  --ion-color-primary-tint: #4561fe;
+  --ion-color-primary-shade: #204c48;
+  --ion-color-primary-tint: #3a6763;
 
   /** secondary **/
   --ion-color-secondary: #3dc2ff;
@@ -68,12 +71,12 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-medium-tint: #9d9fa6;
 
   /** light **/
-  --ion-color-light: #f4f5f8;
-  --ion-color-light-rgb: 244, 245, 248;
+  --ion-color-light: #d5f2e3;
+  --ion-color-light-rgb: 213, 242, 227;
   --ion-color-light-contrast: #000000;
   --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #d7d8da;
-  --ion-color-light-tint: #f5f6f9;
+  --ion-color-light-shade: #bbd5c8;
+  --ion-color-light-tint: #d9f3e6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -83,12 +86,12 @@ http://ionicframework.com/docs/theming/ */
    */
 
   body {
-    --ion-color-primary: #536dfe;
-    --ion-color-primary-rgb: 83, 109, 254;
+    --ion-color-primary: #36817b;
+    --ion-color-primary-rgb: 54, 129, 123;
     --ion-color-primary-contrast: #ffffff;
     --ion-color-primary-contrast-rgb: 255, 255, 255;
-    --ion-color-primary-shade: #4960e0;
-    --ion-color-primary-tint: #647cfe;
+    --ion-color-primary-shade: #30726c;
+    --ion-color-primary-tint: #4a8e88;
 
     --ion-color-secondary: #50c8ff;
     --ion-color-secondary-rgb: 80, 200, 255;
@@ -139,12 +142,14 @@ http://ionicframework.com/docs/theming/ */
     --ion-color-medium-shade: #86888f;
     --ion-color-medium-tint: #a2a4ab;
 
-    --ion-color-light: #222428;
-    --ion-color-light-rgb: 34, 36, 40;
+    --ion-color-light: #04151f;
+    --ion-color-light-rgb: 4, 21, 31;
     --ion-color-light-contrast: #ffffff;
     --ion-color-light-contrast-rgb: 255, 255, 255;
-    --ion-color-light-shade: #1e2023;
-    --ion-color-light-tint: #383a3e;
+    --ion-color-light-shade: #04121b;
+    --ion-color-light-tint: #1d2c35;
+
+    --ion-font-family: 'Roboto Flex';
   }
 
   /*
@@ -184,10 +189,12 @@ http://ionicframework.com/docs/theming/ */
     --ion-card-background: #1c1c1d;
   }
 
-  .ios ion-modal {
-    --ion-background-color: var(--ion-color-step-100);
-    --ion-toolbar-background: var(--ion-color-step-150);
-    --ion-toolbar-border-color: var(--ion-color-step-250);
+  .ios {
+    ion-modal {
+      --ion-background-color: var(--ion-color-step-100);
+      --ion-toolbar-background: var(--ion-color-step-150);
+      --ion-toolbar-border-color: var(--ion-color-step-250);
+    }
   }
 
   /*
@@ -195,54 +202,111 @@ http://ionicframework.com/docs/theming/ */
    * -------------------------------------------
    */
 
-  .md body {
-    --ion-background-color: #121212;
-    --ion-background-color-rgb: 18, 18, 18;
+  .md {
+    body {
+      --ion-background-color: #121212;
+      --ion-background-color-rgb: 18, 18, 18;
 
-    --ion-text-color: #ffffff;
-    --ion-text-color-rgb: 255, 255, 255;
+      --ion-text-color: #ffffff;
+      --ion-text-color-rgb: 255, 255, 255;
 
-    --ion-border-color: #222222;
+      --ion-border-color: #222222;
 
-    --ion-color-step-50: #1e1e1e;
-    --ion-color-step-100: #2a2a2a;
-    --ion-color-step-150: #363636;
-    --ion-color-step-200: #414141;
-    --ion-color-step-250: #4d4d4d;
-    --ion-color-step-300: #595959;
-    --ion-color-step-350: #656565;
-    --ion-color-step-400: #717171;
-    --ion-color-step-450: #7d7d7d;
-    --ion-color-step-500: #898989;
-    --ion-color-step-550: #949494;
-    --ion-color-step-600: #a0a0a0;
-    --ion-color-step-650: #acacac;
-    --ion-color-step-700: #b8b8b8;
-    --ion-color-step-750: #c4c4c4;
-    --ion-color-step-800: #d0d0d0;
-    --ion-color-step-850: #dbdbdb;
-    --ion-color-step-900: #e7e7e7;
-    --ion-color-step-950: #f3f3f3;
+      --ion-color-step-50: #1e1e1e;
+      --ion-color-step-100: #2a2a2a;
+      --ion-color-step-150: #363636;
+      --ion-color-step-200: #414141;
+      --ion-color-step-250: #4d4d4d;
+      --ion-color-step-300: #595959;
+      --ion-color-step-350: #656565;
+      --ion-color-step-400: #717171;
+      --ion-color-step-450: #7d7d7d;
+      --ion-color-step-500: #898989;
+      --ion-color-step-550: #949494;
+      --ion-color-step-600: #a0a0a0;
+      --ion-color-step-650: #acacac;
+      --ion-color-step-700: #b8b8b8;
+      --ion-color-step-750: #c4c4c4;
+      --ion-color-step-800: #d0d0d0;
+      --ion-color-step-850: #dbdbdb;
+      --ion-color-step-900: #e7e7e7;
+      --ion-color-step-950: #f3f3f3;
 
-    --ion-item-background: #1e1e1e;
+      --ion-item-background: #1e1e1e;
 
-    --ion-toolbar-background: #1f1f1f;
+      --ion-toolbar-background: #1f1f1f;
 
-    --ion-tab-bar-background: #1f1f1f;
+      --ion-tab-bar-background: #1f1f1f;
 
-    --ion-card-background: #1e1e1e;
+      --ion-card-background: #1e1e1e;
+    }
   }
 }
 
-.md .tabs-bottom {
-  transform: translateY(-56px) !important;
+body {
+  --ion-font-family: 'Roboto Flex';
 }
-.ios .tabs-bottom {
-  transform: translateY(-60px) !important;
+
+.md {
+  .tabs-bottom {
+    transform: translateY(-56px) !important;
+  }
 }
-.md .header-top {
-  top: 56px !important;
+
+.md {
+  .header-top {
+    top: 56px !important;
+  }
 }
-.ios .header-top {
-  top: 44px !important;
+
+.spin {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+ion-spinner {
+  width: 28px;
+  height: 28px;
+  stroke: #444;
+  fill: #222;
+}
+
+.font-serif {
+  font-family: 'Roboto Serif';
+}
+
+.app-bar {
+  font-family: 'Roboto Serif';
+  font-weight: 600;
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-primary);
+  min-height: 56px;
+  padding: 8px 8px 8px 8px;
+  background: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-bar {
+    font-family: 'Roboto Serif';
+    font-weight: 600;
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    color: var(--ion-color-primary);
+    min-height: 56px;
+    padding: 8px 8px 8px 8px;
+    background: #212121;
+  }
+}
+
+.app-bar-title {
+  font-size: x-large;
+  flex: 1;
+  letter-spacing: -0.05rem;
 }

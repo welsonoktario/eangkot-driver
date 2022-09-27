@@ -1,5 +1,8 @@
 <template>
   <app-layout>
+    <template #header>
+      <app-bar title="Riwayat" />
+    </template>
     <ion-grid
       style="height: 100%"
       class="ion-margin-horizontal"
@@ -58,13 +61,13 @@
                   :src="detail.ktp.webPath"
                   width="200"
                 />
-                <ion-button
+                <e-a-button
                   @click="takePhoto('ktp')"
                   expand="block"
                   fill="clear"
                 >
                   Ambil foto
-                </ion-button>
+                </e-a-button>
               </div>
             </ion-item>
             <ion-item class="ion-margin-top">
@@ -75,24 +78,24 @@
                   :src="detail.sim.webPath"
                   width="200"
                 />
-                <ion-button
+                <e-a-button
                   @click="takePhoto('sim')"
                   expand="block"
                   fill="clear"
                 >
                   Ambil foto
-                </ion-button>
+                </e-a-button>
               </div>
             </ion-item>
           </div>
-          <ion-button
+          <e-a-button
             class="ion-margin-top ion-margin-horizontal"
             expand="block"
             color="primary"
             type="submit"
           >
             Kirim
-          </ion-button>
+          </e-a-button>
         </ion-list>
       </form>
     </template>
@@ -115,9 +118,10 @@ import {
   IonInput,
   IonSelect,
   IonSelectOption,
-  IonButton,
 } from "@ionic/vue";
+import AppBar from "@/components/AppBar.vue";
 import { checkmarkCircle } from "ionicons/icons";
+import EAButton from "@/components/EAButton.vue";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import Http from "cordova-plugin-advanced-http";
@@ -161,7 +165,7 @@ const kirim = async () => {
   const url = process.env.VUE_APP_API_URL;
   const filePaths = [detail.value.ktp.filePath, detail.value.sim.filePath];
   const names = ["ktp", "sim"];
-  
+
   Http.uploadFile(
     url,
     filePaths,

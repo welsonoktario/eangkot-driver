@@ -5,13 +5,13 @@
         auth.authUser.hasPassword ? "Ubah Password" : "Tambah Password"
       }}</IonTitle>
       <IonButtons slot="end">
-        <IonButton @click="back()">
+        <e-a-button @click="back()">
           <IonIcon
             slot="icon-only"
             :md="closeOutline"
             :ios="closeCircle"
           ></IonIcon>
-        </IonButton>
+        </e-a-button>
       </IonButtons>
     </template>
 
@@ -41,14 +41,14 @@
     </template>
 
     <template #footer>
-      <IonButton
+      <e-a-button
         @click="ubahPassword()"
         class="ion-margin"
         expand="block"
         fill="solid"
       >
         Simpan
-      </IonButton>
+      </e-a-button>
     </template>
   </AppLayout>
 </template>
@@ -58,7 +58,6 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import { useAuth } from "@/stores";
 import { showToast } from "@/utils";
 import {
-  IonButton,
   IonButtons,
   IonIcon,
   IonInput,
@@ -70,6 +69,7 @@ import {
 } from "@ionic/vue";
 import { closeCircle, closeOutline } from "ionicons/icons";
 import { ref } from "vue";
+import EAButton from "@/components/EAButton.vue";
 
 const auth = useAuth();
 
