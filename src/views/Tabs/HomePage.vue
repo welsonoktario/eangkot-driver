@@ -6,7 +6,7 @@
           <h1 class="ion-no-margin">{{ isActive ? 'Online' : 'Offline' }}</h1>
         </div>
         <e-a-button
-          @click="isActive = !isActive"
+          @click="setOnline()"
           :color="isActive ? 'primary' : 'danger'"
         >
           <ion-icon :icon="power" />
@@ -34,7 +34,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { IonCol, IonGrid, IonRow, IonIcon } from '@ionic/vue'
 import { GeolocateControl, Map } from 'mapbox-gl'
 import { inject, onMounted, ref } from 'vue'
-import { power } from 'ionicons/icons'
+import { power, watch } from 'ionicons/icons'
 import EAButton from '@/components/EAButton.vue'
 import {
   doc,
@@ -42,7 +42,18 @@ import {
   collection,
   onSnapshot,
   Unsubscribe,
+  setDoc,
+  GeoPoint,
+  deleteDoc,
+  getDocs,
+  updateDoc,
 } from 'firebase/firestore'
+import { Geolocation } from '@capacitor/geolocation'
+import { useAuth } from '@/stores'
+import { User } from '@/types'
+
+const { authDriver, authUser, authAngkot } = useAuth()
+const db: Firestore = inject('db')
 
 let map: Map
 const accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN
@@ -50,9 +61,9 @@ const isLoaded = ref(false)
 const isDark =
   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 const isActive = ref(false)
-const db: Firestore = inject('db')
-const driver = ref<Unsubscribe>()
-const penumpangs = ref<Unsubscribe>()
+const driverSnap = ref<Unsubscribe>()
+const penumpangsSnap = ref<Unsubscribe>()
+const penumpangs = ref<User[]>()
 
 onMounted(async () => {
   loadDocument()
@@ -124,17 +135,96 @@ onMounted(async () => {
 })
 
 const loadDocument = async () => {
-  const docRef = doc(db, 'angkots', '1')
-  const colRef = collection(db, 'angkots/1/penumpangs')
+  const docRef = doc(
+    db,
+    `angkots-${authAngkot.trayek.kode}`,
+    `${authAngkot.id}`
+  )
+  const colRef = collection(
+    db,
+    `angkots-${authAngkot.trayek.kode}/${authAngkot.id}/penumpangs`
+  )
 
-  driver.value = onSnapshot(docRef, (doc) => {
+  driverSnap.value = onSnapshot(docRef, (doc) => {
     console.log('[Doc] Current data: ', doc.data())
+    if (doc.exists()) {
+      isActive.value = true
+    }
   })
 
-  penumpangs.value = onSnapshot(colRef, (doc) => {
-    const ps = doc.docs.map((d) => d.data())
-    console.log('[Col] Current data: ', ps)
+  penumpangsSnap.value = onSnapshot(colRef, (doc) => {
+    penumpangs.value = doc.docs.map((d) => d.data()) as User[]
   })
+}
+
+const setOnline = async () => {
+  let watch: any
+
+  if (!isActive.value) {
+    const geo = await Geolocation.getCurrentPosition()
+    const lokasi = geo.coords
+
+    try {
+      await setDoc(
+        doc(db, `angkots-${authAngkot.trayek.kode}`, `${authAngkot.id}`),
+        {
+          driver: {
+            id: authDriver,
+            nama: authUser.nama,
+          },
+          noKendaraan: authAngkot.noKendaraan,
+          lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
+        },
+        { merge: true }
+      )
+
+      isActive.value = true
+      const docRef = doc(
+        db,
+        `angkots-${authAngkot.trayek.kode}`,
+        `${authAngkot.id}`
+      )
+
+      // watch pergerakan angkot
+      watch = await Geolocation.watchPosition(
+        { enableHighAccuracy: true, timeout: 1000 },
+        (pos) => {
+          if (pos) {
+            const lokasi = pos.coords
+            updateDoc(docRef, {
+              lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
+            })
+          }
+        }
+      )
+    } catch (e: any) {
+      console.error(e)
+    }
+  } else {
+    try {
+      const colRef = collection(
+        db,
+        `angkots-${authAngkot.trayek.kode}/${authAngkot.id}/penumpangs`
+      )
+      const snapshots = await getDocs(colRef)
+
+      if (!snapshots.empty) {
+        alert('Masi ada penumpang')
+      } else {
+        await deleteDoc(
+          doc(db, `angkots-${authAngkot.trayek.kode}`, `${authAngkot.id}`)
+        )
+
+        // hapus watch pergerakan angkot
+        if (watch) {
+          await Geolocation.clearWatch({ id: watch })
+        }
+        isActive.value = false
+      }
+    } catch (e: any) {
+      console.error(e)
+    }
+  }
 }
 </script>
 
