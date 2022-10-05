@@ -32,6 +32,8 @@ export const useAuth = defineStore('auth', {
   actions: {
     setAngkotDocId(id: string) {
       this.docId = id
+      Preferences.remove({ key: 'docId' })
+      Preferences.set({ key: 'docId', value: id })
     },
     async setAuthUser(data: any, token: string = null) {
       this.user = data.user
@@ -50,36 +52,43 @@ export const useAuth = defineStore('auth', {
       })
 
       if (token) {
-        await Preferences.remove({ key: 'token' })
         this.token = token
+        await Preferences.remove({ key: 'token' })
         await Preferences.set({ key: 'token', value: token })
       }
     },
     async checkAuth() {
-      const user = await Preferences.get({ key: 'user' })
-      const token = await Preferences.get({ key: 'token' })
-      const driver = await Preferences.get({ key: 'driver' })
-      const angkot = await Preferences.get({ key: 'angkot' })
+      let isAuthenticated = true
+      const keys = ['user', 'token', 'driver', 'angkot']
+      const preferences = [
+        Preferences.get({ key: 'user' }),
+        Preferences.get({ key: 'token' }),
+        Preferences.get({ key: 'driver' }),
+        Preferences.get({ key: 'angkot' }),
+      ]
 
-      if (
-        user.value &&
-        user.value != 'null' &&
-        token.value &&
-        token.value != 'null' &&
-        driver.value &&
-        driver.value != 'null' &&
-        angkot.value &&
-        angkot.value != 'null'
-      ) {
-        this.user = JSON.parse(user.value)
-        this.token = token.value
-        this.driver = driver.value
-        this.angkot = JSON.parse(angkot.value)
+      const prefValues = await Promise.all(preferences)
 
-        return true
+      prefValues.forEach((res, i) => {
+        if (res.value && res.value !== 'null') {
+          const key = keys[i]
+          if (key === 'user' || key === 'angkot') {
+            this[key] = JSON.parse(res.value)
+          } else {
+            this[key] = res.value
+          }
+        } else {
+          isAuthenticated = false
+        }
+      })
+
+      const { value } = await Preferences.get({ key: 'docId' })
+
+      if (value) {
+        this.docId = value
       }
 
-      return false
+      return isAuthenticated
     },
     async login(phone: string) {
       return await post('auth/login', { phone, driver: true })

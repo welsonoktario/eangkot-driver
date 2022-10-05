@@ -31,8 +31,8 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { IonCol, IonGrid, IonRow, IonIcon } from '@ionic/vue'
-import { GeolocateControl, Map } from 'mapbox-gl'
+import { IonCol, IonGrid, IonRow, IonIcon, loadingController } from '@ionic/vue'
+import { GeolocateControl, Map, Marker } from 'mapbox-gl'
 import { inject, onMounted, ref } from 'vue'
 import { power } from 'ionicons/icons'
 import EAButton from '@/components/EAButton.vue'
@@ -42,7 +42,6 @@ import {
   collection,
   onSnapshot,
   Unsubscribe,
-  setDoc,
   GeoPoint,
   deleteDoc,
   getDocs,
@@ -68,6 +67,7 @@ const isActive = ref(false)
 const driverSnap = ref<Unsubscribe>()
 const penumpangsSnap = ref<Unsubscribe>()
 const penumpangs = ref<User[]>()
+const markerLokasi = ref<Marker>()
 
 onMounted(async () => {
   loadDocument()
@@ -139,6 +139,9 @@ onMounted(async () => {
 })
 
 const loadDocument = async () => {
+  const geo = await Geolocation.getCurrentPosition()
+  const lokasi = geo.coords
+
   const q = query(
     collection(db, `angkots-${authAngkot.trayek.kode}`),
     where('id', '==', authAngkot.id)
@@ -156,9 +159,26 @@ const loadDocument = async () => {
     )
 
     driverSnap.value = onSnapshot(docRef, (doc) => {
-      console.log('[Doc] Current data: ', doc.data())
       if (doc.exists()) {
+        const data = doc.data()
         isActive.value = true
+
+        if (!markerLokasi.value) {
+          markerLokasi.value = new Marker()
+            .setLngLat([lokasi.longitude, lokasi.latitude])
+            .addTo(map)
+          map.flyTo({
+            animate: true,
+            center: markerLokasi.value.getLngLat(),
+          })
+        } else {
+          markerLokasi.value.setLngLat([
+            data.lokasi.longitude,
+            data.lokasi.latitude,
+          ])
+        }
+      } else {
+        markerLokasi.value.remove()
       }
     })
 
@@ -168,8 +188,16 @@ const loadDocument = async () => {
   }
 }
 
+// ini susah 🫠
 const setOnline = async () => {
   let watch: any
+  const loading = await loadingController.create({
+    animated: true,
+    message: 'Loading...',
+    backdropDismiss: false,
+  })
+
+  await loading.present()
 
   if (!isActive.value) {
     const geo = await Geolocation.getCurrentPosition()
@@ -178,6 +206,7 @@ const setOnline = async () => {
     try {
       const colRef = collection(db, `angkots-${authAngkot.trayek.kode}`)
       const adr = await addDoc(colRef, {
+        id: authAngkot.id,
         driver: {
           id: authDriver,
           nama: authUser.nama,
@@ -189,6 +218,14 @@ const setOnline = async () => {
       setAngkotDocId(adr.id)
       isActive.value = true
       const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, adr.id)
+
+      markerLokasi.value = new Marker()
+        .setLngLat([lokasi.longitude, lokasi.latitude])
+        .addTo(map)
+      map.flyTo({
+        animate: true,
+        center: markerLokasi.value.getLngLat(),
+      })
 
       // watch pergerakan angkot
       watch = await Geolocation.watchPosition(
@@ -206,6 +243,8 @@ const setOnline = async () => {
       console.error(e)
     }
   } else {
+    markerLokasi.value.remove()
+
     try {
       const colRef = collection(
         db,
@@ -228,6 +267,8 @@ const setOnline = async () => {
       console.error(e)
     }
   }
+  
+  loading.dismiss()
 }
 </script>
 
