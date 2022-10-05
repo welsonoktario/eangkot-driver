@@ -34,7 +34,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { IonCol, IonGrid, IonRow, IonIcon } from '@ionic/vue'
 import { GeolocateControl, Map } from 'mapbox-gl'
 import { inject, onMounted, ref } from 'vue'
-import { power, watch } from 'ionicons/icons'
+import { power } from 'ionicons/icons'
 import EAButton from '@/components/EAButton.vue'
 import {
   doc,
@@ -47,12 +47,18 @@ import {
   deleteDoc,
   getDocs,
   updateDoc,
+  query,
+  where,
+  DocumentData,
+  DocumentReference,
+  addDoc,
 } from 'firebase/firestore'
 import { Geolocation } from '@capacitor/geolocation'
 import { useAuth } from '@/stores'
 import { User } from '@/types'
 
-const { authDriver, authUser, authAngkot } = useAuth()
+const { authDriver, authUser, authAngkot, setAngkotDoc, angkotDocRef } =
+  useAuth()
 const db: Firestore = inject('db')
 
 let map: Map
@@ -135,26 +141,33 @@ onMounted(async () => {
 })
 
 const loadDocument = async () => {
-  const docRef = doc(
-    db,
-    `angkots-${authAngkot.trayek.kode}`,
-    `${authAngkot.id}`
+  const q = query(
+    collection(db, `angkots-${authAngkot.trayek.kode}`),
+    where('id', '==', authAngkot.id)
   )
-  const colRef = collection(
-    db,
-    `angkots-${authAngkot.trayek.kode}/${authAngkot.id}/penumpangs`
-  )
-
-  driverSnap.value = onSnapshot(docRef, (doc) => {
-    console.log('[Doc] Current data: ', doc.data())
-    if (doc.exists()) {
-      isActive.value = true
-    }
+  const querySnapshot = await getDocs(q)
+  querySnapshot.forEach((doc) => {
+    setAngkotDoc(doc)
   })
 
-  penumpangsSnap.value = onSnapshot(colRef, (doc) => {
-    penumpangs.value = doc.docs.map((d) => d.data()) as User[]
-  })
+  if (angkotDocRef) {
+    const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, angkotDocRef.id)
+    const colRef = collection(
+      db,
+      `angkots-${authAngkot.trayek.kode}/${angkotDocRef.id}/penumpangs`
+    )
+
+    driverSnap.value = onSnapshot(docRef, (doc) => {
+      console.log('[Doc] Current data: ', doc.data())
+      if (doc.exists()) {
+        isActive.value = true
+      }
+    })
+
+    penumpangsSnap.value = onSnapshot(colRef, (doc) => {
+      penumpangs.value = doc.docs.map((d) => d.data()) as User[]
+    })
+  }
 }
 
 const setOnline = async () => {
@@ -165,25 +178,19 @@ const setOnline = async () => {
     const lokasi = geo.coords
 
     try {
-      await setDoc(
-        doc(db, `angkots-${authAngkot.trayek.kode}`, `${authAngkot.id}`),
-        {
-          driver: {
-            id: authDriver,
-            nama: authUser.nama,
-          },
-          noKendaraan: authAngkot.noKendaraan,
-          lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
+      const colRef = collection(db, `angkots-${authAngkot.trayek.kode}`)
+      const adr = await addDoc(colRef, {
+        driver: {
+          id: authDriver,
+          nama: authUser.nama,
         },
-        { merge: true }
-      )
+        noKendaraan: authAngkot.noKendaraan,
+        lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
+      })
 
+      setAngkotDoc(adr)
       isActive.value = true
-      const docRef = doc(
-        db,
-        `angkots-${authAngkot.trayek.kode}`,
-        `${authAngkot.id}`
-      )
+      const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, `${adr.id}`)
 
       // watch pergerakan angkot
       watch = await Geolocation.watchPosition(
@@ -204,7 +211,7 @@ const setOnline = async () => {
     try {
       const colRef = collection(
         db,
-        `angkots-${authAngkot.trayek.kode}/${authAngkot.id}/penumpangs`
+        `angkots-${authAngkot.trayek.kode}/${angkotDocRef.id}/penumpangs`
       )
       const snapshots = await getDocs(colRef)
 
@@ -212,7 +219,7 @@ const setOnline = async () => {
         alert('Masi ada penumpang')
       } else {
         await deleteDoc(
-          doc(db, `angkots-${authAngkot.trayek.kode}`, `${authAngkot.id}`)
+          doc(db, `angkots-${authAngkot.trayek.kode}`, `${angkotDocRef.id}`)
         )
 
         // hapus watch pergerakan angkot

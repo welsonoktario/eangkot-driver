@@ -2,6 +2,7 @@ import { Angkot } from '@/types'
 import { User } from '@/types/user'
 import { patch, post } from '@/utils/http'
 import { Preferences } from '@capacitor/preferences'
+import { DocumentData, QueryDocumentSnapshot } from '@firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
@@ -10,6 +11,7 @@ type AuthState = {
   driver: number | undefined
   token: string | undefined
   angkot: Angkot | undefined
+  docRef: QueryDocumentSnapshot<DocumentData> | undefined
 }
 
 export const useAuth = defineStore('auth', {
@@ -19,14 +21,19 @@ export const useAuth = defineStore('auth', {
       driver: undefined,
       token: undefined,
       angkot: undefined,
+      docRef: undefined,
     } as AuthState),
   getters: {
     authUser: (state) => state.user,
     authToken: (state) => state.token,
     authDriver: (state) => state.driver,
     authAngkot: (state) => state.angkot,
+    angkotDocRef: (state) => state.docRef,
   },
   actions: {
+    setAngkotDoc(doc: QueryDocumentSnapshot<DocumentData>) {
+      this.docRef = doc
+    },
     async setAuthUser(data: any, token: string = null) {
       this.user = data.user
       this.driver = data.user.driver.id
