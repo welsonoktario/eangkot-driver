@@ -49,15 +49,13 @@ import {
   updateDoc,
   query,
   where,
-  DocumentData,
-  DocumentReference,
   addDoc,
 } from 'firebase/firestore'
 import { Geolocation } from '@capacitor/geolocation'
 import { useAuth } from '@/stores'
 import { User } from '@/types'
 
-const { authDriver, authUser, authAngkot, setAngkotDoc, angkotDocRef } =
+const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId } =
   useAuth()
 const db: Firestore = inject('db')
 
@@ -147,14 +145,14 @@ const loadDocument = async () => {
   )
   const querySnapshot = await getDocs(q)
   querySnapshot.forEach((doc) => {
-    setAngkotDoc(doc)
+    setAngkotDocId(doc.id)
   })
 
-  if (angkotDocRef) {
-    const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, angkotDocRef.id)
+  if (authDocId) {
+    const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId)
     const colRef = collection(
       db,
-      `angkots-${authAngkot.trayek.kode}/${angkotDocRef.id}/penumpangs`
+      `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
     )
 
     driverSnap.value = onSnapshot(docRef, (doc) => {
@@ -188,9 +186,9 @@ const setOnline = async () => {
         lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
       })
 
-      setAngkotDoc(adr)
+      setAngkotDocId(adr.id)
       isActive.value = true
-      const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, `${adr.id}`)
+      const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, adr.id)
 
       // watch pergerakan angkot
       watch = await Geolocation.watchPosition(
@@ -211,16 +209,14 @@ const setOnline = async () => {
     try {
       const colRef = collection(
         db,
-        `angkots-${authAngkot.trayek.kode}/${angkotDocRef.id}/penumpangs`
+        `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
       )
       const snapshots = await getDocs(colRef)
 
       if (!snapshots.empty) {
         alert('Masi ada penumpang')
       } else {
-        await deleteDoc(
-          doc(db, `angkots-${authAngkot.trayek.kode}`, `${angkotDocRef.id}`)
-        )
+        await deleteDoc(doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId))
 
         // hapus watch pergerakan angkot
         if (watch) {
