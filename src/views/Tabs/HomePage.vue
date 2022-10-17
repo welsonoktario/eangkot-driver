@@ -2,14 +2,19 @@
   <app-layout>
     <template #content>
       <div class="top-bar">
-        <div class="fill">
-          <h1 class="ion-no-margin">{{ isActive ? 'Online' : 'Offline' }}</h1>
-        </div>
         <e-a-button
+          class="ion-margin-end"
           @click="setOnline()"
           :color="isActive ? 'primary' : 'danger'"
         >
           <ion-icon :icon="power" />
+        </e-a-button>
+        <div class="fill">
+          <h1 class="ion-no-margin">{{ isActive ? 'Online' : 'Offline' }}</h1>
+        </div>
+        <e-a-button class="btn-pesanan" @click="openModalPesanan()">
+          <ion-icon :icon="receipt" />
+          <ion-badge color="danger" slot="end">2</ion-badge>
         </e-a-button>
       </div>
 
@@ -31,10 +36,19 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { IonCol, IonGrid, IonRow, IonIcon, loadingController } from '@ionic/vue'
+import ModalPesanan from '@/components/Home/ModalPesanan.vue'
+import {
+  IonBadge,
+  IonCol,
+  IonGrid,
+  IonRow,
+  IonIcon,
+  loadingController,
+  modalController,
+} from '@ionic/vue'
 import { GeolocateControl, Map, Marker } from 'mapbox-gl'
 import { inject, onMounted, ref } from 'vue'
-import { power } from 'ionicons/icons'
+import { receipt, power } from 'ionicons/icons'
 import EAButton from '@/components/EAButton.vue'
 import {
   doc,
@@ -267,8 +281,16 @@ const setOnline = async () => {
       console.error(e)
     }
   }
-  
+
   loading.dismiss()
+}
+
+const openModalPesanan = async () => {
+  const modal = await modalController.create({
+    component: ModalPesanan,
+  })
+
+  await modal.present()
 }
 </script>
 
@@ -328,6 +350,20 @@ ion-col {
 
   .fill {
     flex-grow: 1;
+  }
+
+  ion-button.btn-pesanan {
+    position: relative;
+
+    &::part(native) {
+      overflow: visible;
+    }
+
+    ion-badge {
+      position: absolute;
+      top: -0.25rem;
+      right: -1rem;
+    }
   }
 }
 </style>
