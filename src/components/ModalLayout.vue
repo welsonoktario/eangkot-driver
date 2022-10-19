@@ -2,7 +2,7 @@
   <ion-header class="ion-no-border">
     <app-bar :title="title">
       <template #start>
-        <e-a-buttons>
+        <ion-buttons>
           <e-a-button class="ion-no-padding" fill="clear" @click="onStartClick">
             <ion-icon
               slot="icon-only"
@@ -10,7 +10,7 @@
               :icon="closeOutline"
             ></ion-icon>
           </e-a-button>
-        </e-a-buttons>
+        </ion-buttons>
       </template>
 
       <template #end v-if="endIcon">
@@ -34,6 +34,7 @@
 
 <script lang="ts" setup>
 import {
+  IonButtons,
   IonContent,
   IonFooter,
   IonHeader,
