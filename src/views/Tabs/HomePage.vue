@@ -308,8 +308,6 @@ const watchPenumpang = async () => {
 
       return data
     }) as Pesanan[]
-
-    console.log(pesanans.value)
   })
 }
 </script>
