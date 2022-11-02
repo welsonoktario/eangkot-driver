@@ -2,7 +2,7 @@ import { CapacitorHttp as Http, HttpOptions } from '@capacitor/core'
 import { Preferences } from '@capacitor/preferences'
 import { keysToSnake } from './bodySerializer'
 
-const API_URL = process.env.VUE_APP_API_URL
+const API_URL = import.meta.env.VITE_API_URL
 
 export const get = async (endpoint: string) => {
   const isAPI = !endpoint.includes('http')

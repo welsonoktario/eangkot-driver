@@ -1,7 +1,7 @@
 import { User } from "./user";
 
 export type Pesanan = {
-  id: number;
+  docId: string;
   jemput: {
     lat: [number, number];
     long: [number, number];
@@ -10,7 +10,6 @@ export type Pesanan = {
     lat: [number, number];
     long: [number, number];
   };
-  penumpang: number;
   status: string;
   tanggal: string;
   user?: User;

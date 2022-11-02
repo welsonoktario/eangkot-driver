@@ -162,7 +162,7 @@ const takePhoto = async (type: PhotoType) => {
 };
 
 const kirim = async () => {
-  const url = process.env.VUE_APP_API_URL;
+  const url = import.meta.env.VITE_API_URL;
   const filePaths = [detail.value.ktp.filePath, detail.value.sim.filePath];
   const names = ["ktp", "sim"];
 

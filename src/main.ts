@@ -26,13 +26,11 @@ import './theme/variables.scss'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { db } from './utils/firebase'
-import { createEcho } from './utils/pusher'
 
 const app = createApp(App)
   .use(IonicVue)
   .use(router)
   .use(createPinia())
-  .provide('pusher', createEcho)
   .provide('db', db)
 
 router.isReady().then(() => {

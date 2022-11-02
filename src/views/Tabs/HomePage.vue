@@ -14,7 +14,9 @@
         </div>
         <e-a-button class="btn-pesanan" @click="openModalPesanan()">
           <ion-icon :icon="receipt" />
-          <ion-badge color="danger" slot="end">2</ion-badge>
+          <ion-badge v-if="penumpangCount" color="danger" slot="end">{{
+            penumpangCount
+          }}</ion-badge>
         </e-a-button>
       </div>
 
@@ -35,52 +37,52 @@
 </template>
 
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue'
+import EAButton from '@/components/EAButton.vue'
 import ModalPesanan from '@/components/Home/ModalPesanan.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useAuth } from '@/stores'
+import { Pesanan } from '@/types'
+import { Geolocation } from '@capacitor/geolocation'
 import {
   IonBadge,
   IonCol,
   IonGrid,
-  IonRow,
   IonIcon,
+  IonRow,
   loadingController,
   modalController,
 } from '@ionic/vue'
-import { GeolocateControl, Map, Marker } from 'mapbox-gl'
-import { inject, onMounted, ref } from 'vue'
-import { receipt, power } from 'ionicons/icons'
-import EAButton from '@/components/EAButton.vue'
 import {
+  addDoc,
+  collection,
+  deleteDoc,
   doc,
   Firestore,
-  collection,
-  onSnapshot,
-  Unsubscribe,
   GeoPoint,
-  deleteDoc,
   getDocs,
-  updateDoc,
+  onSnapshot,
   query,
+  Unsubscribe,
+  updateDoc,
   where,
-  addDoc,
 } from 'firebase/firestore'
-import { Geolocation } from '@capacitor/geolocation'
-import { useAuth } from '@/stores'
-import { User } from '@/types'
+import { power, receipt } from 'ionicons/icons'
+import { GeolocateControl, Map, Marker } from 'mapbox-gl'
+import { computed, inject, onMounted, ref } from 'vue'
 
 const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId } =
   useAuth()
 const db: Firestore = inject('db')
 
 let map: Map
-const accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN
+const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 const isLoaded = ref(false)
 const isDark =
   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 const isActive = ref(false)
 const driverSnap = ref<Unsubscribe>()
 const penumpangsSnap = ref<Unsubscribe>()
-const penumpangs = ref<User[]>()
+const pesanans = ref<Pesanan[]>()
 const markerLokasi = ref<Marker>()
 
 onMounted(async () => {
@@ -152,6 +154,10 @@ onMounted(async () => {
     })
 })
 
+const penumpangCount = computed(() =>
+  pesanans.value ? pesanans.value.length : null
+)
+
 const loadDocument = async () => {
   const geo = await Geolocation.getCurrentPosition()
   const lokasi = geo.coords
@@ -167,10 +173,6 @@ const loadDocument = async () => {
 
   if (authDocId) {
     const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId)
-    const colRef = collection(
-      db,
-      `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
-    )
 
     driverSnap.value = onSnapshot(docRef, (doc) => {
       if (doc.exists()) {
@@ -196,9 +198,7 @@ const loadDocument = async () => {
       }
     })
 
-    penumpangsSnap.value = onSnapshot(colRef, (doc) => {
-      penumpangs.value = doc.docs.map((d) => d.data()) as User[]
-    })
+    await watchPenumpang()
   }
 }
 
@@ -291,6 +291,26 @@ const openModalPesanan = async () => {
   })
 
   await modal.present()
+}
+
+const watchPenumpang = async () => {
+  const colRef = collection(
+    db,
+    `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
+  )
+
+  penumpangsSnap.value = onSnapshot(colRef, (doc) => {
+    pesanans.value = doc.docs.map((d) => {
+      const data = d.data()
+      data.jemput = [data.jemput.longitude, data.jemput.latitude]
+      data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
+      data.docId = d.id
+
+      return data
+    }) as Pesanan[]
+
+    console.log(pesanans.value)
+  })
 }
 </script>
 
