@@ -40,7 +40,7 @@
 import EAButton from '@/components/EAButton.vue'
 import ModalPesanan from '@/components/Home/ModalPesanan.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { useAuth } from '@/stores'
+import { useAuth, usePesanan } from '@/stores'
 import { Pesanan } from '@/types'
 import { Geolocation } from '@capacitor/geolocation'
 import {
@@ -72,6 +72,7 @@ import { computed, inject, onMounted, ref } from 'vue'
 
 const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId } =
   useAuth()
+const pesanan = usePesanan()
 const db: Firestore = inject('db')
 
 let map: Map
@@ -82,7 +83,6 @@ const isDark =
 const isActive = ref(false)
 const driverSnap = ref<Unsubscribe>()
 const penumpangsSnap = ref<Unsubscribe>()
-const pesanans = ref<Pesanan[]>()
 const markerLokasi = ref<Marker>()
 
 onMounted(async () => {
@@ -155,7 +155,7 @@ onMounted(async () => {
 })
 
 const penumpangCount = computed(() =>
-  pesanans.value ? pesanans.value.length : null
+  pesanan.pesanans ? pesanan.pesanans.length : null
 )
 
 const loadDocument = async () => {
@@ -194,7 +194,9 @@ const loadDocument = async () => {
           ])
         }
       } else {
-        markerLokasi.value.remove()
+        if (markerLokasi.value) {
+          markerLokasi.value.remove()
+        }
       }
     })
 
@@ -300,7 +302,7 @@ const watchPenumpang = async () => {
   )
 
   penumpangsSnap.value = onSnapshot(colRef, (doc) => {
-    pesanans.value = doc.docs.map((d) => {
+    const data = doc.docs.map((d) => {
       const data = d.data()
       data.jemput = [data.jemput.longitude, data.jemput.latitude]
       data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
@@ -308,6 +310,8 @@ const watchPenumpang = async () => {
 
       return data
     }) as Pesanan[]
+
+    pesanan.setPesanans(data)
   })
 }
 </script>

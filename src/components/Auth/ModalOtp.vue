@@ -1,16 +1,5 @@
 <template>
-  <app-layout>
-    <template #header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <e-a-button @click="closeModal(null)">
-            <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
-          </e-a-button>
-        </ion-buttons>
-        <ion-title>OTP</ion-title>
-      </ion-toolbar>
-    </template>
-
+  <modal-layout title="OTP" @start-click="closeModal(false)">
     <template #content>
       <ion-label>Kode OTP</ion-label>
       <div style="display: flex; flex-direction: row; width: 100%">
@@ -31,58 +20,50 @@
         Lanjut
       </e-a-button>
     </template>
-  </app-layout>
+  </modal-layout>
 </template>
 
 <script lang="ts" setup>
-import AppLayout from "@/layouts/AppLayout.vue";
-import { useAuth } from "@/stores";
-import { Dialog } from "@capacitor/dialog";
-import {
-  IonButtons,
-  IonIcon,
-  IonLabel,
-  IonTitle,
-  IonToolbar,
-  modalController,
-} from "@ionic/vue";
-import { arrowBack } from "ionicons/icons";
-import { onMounted, ref } from "vue";
-import VOtpInput from "vue3-otp-input";
-import EAButton from "@/components/EAButton.vue";
+import EAButton from '@/components/EAButton.vue'
+import ModalLayout from '@/components/ModalLayout.vue'
+import { useAuth } from '@/stores'
+import { Dialog } from '@capacitor/dialog'
+import { IonLabel, modalController } from '@ionic/vue'
+import { onMounted, ref } from 'vue'
+import VOtpInput from 'vue3-otp-input'
 
-const auth = useAuth();
+const auth = useAuth()
 
 const props = defineProps({
   phone: {
     type: String,
     required: true,
   },
-});
+})
 
-const pin = ref("");
+const pin = ref('')
 
-onMounted(() => requestOtp());
+onMounted(() => requestOtp())
 
 const handleOnComplete = (value: string) => {
-  pin.value = value;
-};
+  pin.value = value
+}
 
-const closeModal = (data: any) => modalController.dismiss(data);
+const closeModal = (data: any) => modalController.dismiss(data)
 
-const requestOtp = async () => await auth.requestOTP(props.phone);
+const requestOtp = async () => await auth.requestOTP(props.phone)
 
 const checkOtp = async () => {
-  const res = await auth.checkOTP(props.phone, pin.value);
-  const data = await res.data;
+  const res = await auth.checkOTP(props.phone, pin.value)
+  const data = await res.data
 
   if (data.msg) {
-    await modalController.dismiss(true);
+    await modalController.dismiss(true)
   } else {
     await Dialog.alert({
-      title: "Error",
-      message: "Kode OTP tidak cocok",
-    });
+      title: 'Error',
+      message: 'Kode OTP tidak cocok',
+    })
   }
-};
+}
 </script>
