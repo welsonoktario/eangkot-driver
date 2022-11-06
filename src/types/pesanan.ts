@@ -1,16 +1,17 @@
-import { User } from "./user";
+import { User } from './user'
 
 export type Pesanan = {
-  docId: string;
+  docId: string
   jemput: {
-    lat: [number, number];
-    long: [number, number];
-  };
+    lat: [number, number]
+    long: [number, number]
+  }
   tujuan: {
-    lat: [number, number];
-    long: [number, number];
-  };
-  status: string;
-  tanggal: string;
-  user?: User;
-};
+    lat: [number, number]
+    long: [number, number]
+  }
+  status: string
+  tanggal: string
+  user?: User
+  timer: number
+}

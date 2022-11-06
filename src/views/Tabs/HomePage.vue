@@ -307,11 +307,13 @@ const watchPenumpang = async () => {
       data.jemput = [data.jemput.longitude, data.jemput.latitude]
       data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
       data.docId = d.id
+      data.timer = 15
 
       return data
     }) as Pesanan[]
 
     pesanan.setPesanans(data)
+    pesanan.startTimer()
   })
 }
 </script>
