@@ -27,11 +27,13 @@
     "@capacitor/toast": "^4.0.1",
     "@ionic/vue": "^6.3.3",
     "@ionic/vue-router": "^6.3.3",
+    "chart.js": "^3.9.1",
     "firebase": "^9.13.0",
     "ionicons": "^6.0.3",
     "mapbox-gl": "^2.10.0",
     "pinia": "^2.0.21",
     "vue": "^3.2.41",
+    "vue-chartjs": "^4.1.2",
     "vue-router": "^4.1.6",
     "vue3-otp-input": "^0.3.6"
   },

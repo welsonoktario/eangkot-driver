@@ -14,13 +14,9 @@ export const get = async (endpoint: string) => {
   if (isAPI) {
     const { value } = await Preferences.get({ key: 'token' })
 
-    Object.assign(
-      headers,
-      !value &&
-        value !== 'null' && {
-          Authorization: `Bearer ${value}`,
-        }
-    )
+    Object.assign(headers, {
+      Authorization: `Bearer ${value}`,
+    })
   }
 
   const options: HttpOptions = {
