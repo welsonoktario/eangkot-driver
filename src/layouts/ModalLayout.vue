@@ -42,7 +42,7 @@ import {
 } from '@ionic/vue'
 import { closeOutline } from 'ionicons/icons'
 import { useSlots } from 'vue'
-import AppBar from './AppBar.vue'
+import AppBar from '../components/AppBar.vue'
 import EAButton from "@/components/EAButton.vue";
 
 defineProps({

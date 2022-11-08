@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import EAButton from '@/components/EAButton.vue'
-import ModalLayout from '@/components/ModalLayout.vue'
+import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useAuth } from '@/stores'
 import { Dialog } from '@capacitor/dialog'
 import { IonLabel, modalController } from '@ionic/vue'

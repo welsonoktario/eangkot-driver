@@ -9,30 +9,101 @@
         <ion-refresher-content />
       </ion-refresher>
 
-      <Line
-        v-if="!loading"
-        class="ion-margin"
-        ref="chart"
-        :chart-data="chartData"
-        :chart-options="chartOptions"
-      />
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Pendapatan</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label>Pilih durasi:</ion-label>
+            <ion-select
+              interface="popover"
+              placeholder="Durasi"
+              :value="durasi.toString()"
+              @ion-change="handleDurasiChange($event.detail.value)"
+            >
+              <ion-select-option value="3" selected
+                >3 hari terakhir</ion-select-option
+              >
+              <ion-select-option value="7">7 hari terakhir</ion-select-option>
+              <ion-select-option value="30">30 hari terakhir</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <line
+            v-if="!loading"
+            class="ion-margin"
+            ref="chart"
+            :chart-data="chartData"
+            :chart-options="chartOptions"
+          />
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Riwayat Perjalanan</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list v-if="pesanans.length">
+            <list-riwayat
+              v-for="pesanan in pesanans"
+              :key="`pesanan-${pesanan.id}`"
+              :pesanan="pesanan"
+            />
+            <ion-item
+              v-if="pesanans.length > 5"
+              detail
+              button
+              @click="openModalListRiwayat()"
+            >
+              <p class="ion-text-center">Lihat lebih lengkap</p>
+            </ion-item>
+          </ion-list>
+          <p v-else class="ion-text-center ion-margin-vertical">
+            Belum ada riwayat
+          </p>
+
+          <ion-item detail button @click="openModalListRiwayat()">
+            <p class="ion-text-center">Lihat lebih lengkap</p>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
     </template>
   </app-layout>
 </template>
 
 <script setup lang="ts">
 import AppBar from '@/components/AppBar.vue'
+import ListRiwayat from '@/components/Statistik/ListRiwayat.vue'
+import ModalListRiwayat from '@/components/Statistik/ModalListRiwayat.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { Pesanan } from '@/types'
 import { get } from '@/utils/http'
-import { IonRefresher, IonRefresherContent } from '@ionic/vue'
+import {
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonRefresher,
+  IonRefresherContent,
+  IonSelect,
+  IonSelectOption,
+  modalController,
+} from '@ionic/vue'
 import 'chart.js/auto'
 import { onMounted, ref } from 'vue'
 import { Line } from 'vue-chartjs'
 
 const loading = ref(true)
+const durasi = ref(3)
+const pesanans = ref<Pesanan[]>([])
 const chart = ref()
 const chartData = ref()
-const chartOptions = {
+const chartOptions: any = {
   responsive: true,
   interaction: {
     mode: 'index',
@@ -78,18 +149,19 @@ const chartOptions = {
 
 const loadStatistik = async () => {
   loading.value = true
-  const res = await get('driver/statistik')
+  const res = await get('driver/statistik?durasi=' + durasi.value)
   const { data } = res
+  const { transaksis, pesanans } = data
   const total = []
   const jumlah = []
 
-  for (const tanggal in data) {
+  pesanans.value = pesanans
+
+  for (const tanggal in transaksis) {
     const transaksi = data[tanggal]
     total.push(transaksi.total)
     jumlah.push(transaksi.transaksi)
   }
-
-  console.log(total, jumlah)
 
   chartData.value = {
     labels: Object.keys(data),
@@ -110,6 +182,7 @@ const loadStatistik = async () => {
       },
     ],
   }
+  chart.value.update()
 
   loading.value = false
 }
@@ -117,6 +190,19 @@ const loadStatistik = async () => {
 const handleRefresh = async (event: any) => {
   await loadStatistik()
   event.target.complete()
+}
+
+const handleDurasiChange = async (selectedDurasi: number) => {
+  durasi.value = selectedDurasi
+  await loadStatistik()
+}
+
+const openModalListRiwayat = async () => {
+  const modal = await modalController.create({
+    component: ModalListRiwayat,
+  })
+
+  await modal.present()
 }
 
 onMounted(async () => await loadStatistik())

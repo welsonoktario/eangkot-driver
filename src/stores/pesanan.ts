@@ -1,9 +1,9 @@
-import { Pesanan } from '@/types'
+import { PesananFB } from '@/types'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
 type PesananState = {
-  _pesanans: Pesanan[]
+  _pesanans: PesananFB[]
 }
 
 export const usePesanan = defineStore('pesanan', {
@@ -15,10 +15,10 @@ export const usePesanan = defineStore('pesanan', {
     pesanans: (state) => state._pesanans,
   },
   actions: {
-    setPesanans(pesanans: Pesanan[]) {
+    setPesanans(pesanans: PesananFB[]) {
       if (!this._pesanans.length) {
         pesanans.forEach((p1) => {
-          if (!this._pesanans.some((p2: Pesanan) => p2.docId === p1.docId)) {
+          if (!this._pesanans.some((p2: PesananFB) => p2.docId === p1.docId)) {
             this._pesanans.push(p1)
           }
         })
@@ -27,7 +27,7 @@ export const usePesanan = defineStore('pesanan', {
       }
     },
     updatePesanan(
-      pesanan: Pesanan,
+      pesanan: PesananFB,
       status: 'pending' | 'diterima' | 'ditolak' | 'mengantar' | 'selesai'
     ) {
       const selectedPesanan =

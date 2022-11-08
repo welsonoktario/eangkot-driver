@@ -7,9 +7,9 @@
 </template>
 
 <script lang="ts" setup>
-import ModalLayout from '@/components/ModalLayout.vue'
+import ModalLayout from '@/layouts/ModalLayout.vue'
 import { usePesanan } from '@/stores'
-import { Pesanan } from '@/types'
+import { PesananFB as Pesanan } from '@/types'
 import { modalController } from '@ionic/vue'
 
 type PesananDetailProps = {
