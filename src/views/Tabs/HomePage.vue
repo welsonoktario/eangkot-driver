@@ -41,7 +41,7 @@ import EAButton from '@/components/EAButton.vue'
 import ModalPesanan from '@/components/Home/ModalPesanan.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { useAuth, usePesanan } from '@/stores'
-import { Pesanan } from '@/types'
+import { PesananFB as Pesanan } from '@/types'
 import { Geolocation } from '@capacitor/geolocation'
 import {
   IonBadge,
@@ -307,13 +307,11 @@ const watchPenumpang = async () => {
       data.jemput = [data.jemput.longitude, data.jemput.latitude]
       data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
       data.docId = d.id
-      data.timer = 15
 
       return data
     }) as Pesanan[]
 
     pesanan.setPesanans(data)
-    pesanan.startTimer()
   })
 }
 </script>

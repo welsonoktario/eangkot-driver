@@ -1,5 +1,9 @@
 <template>
-  <ion-card>
+  <ion-card
+    detail
+    button
+    @click="openModalDetailRiwayat(transaksi as Transaksi)"
+  >
     <ion-card-header>
       <ion-card-title>Transaksi #{{ transaksi.id }}</ion-card-title>
     </ion-card-header>
@@ -8,6 +12,7 @@
 </template>
 
 <script lang="ts" setup>
+import { Transaksi } from '@/types'
 import {
   IonCard,
   IonCardContent,
@@ -21,4 +26,6 @@ defineProps({
     required: true,
   },
 })
+
+const openModalDetailRiwayat = async (transaksi: Transaksi) => {}
 </script>

@@ -7,7 +7,6 @@
           :key="p.docId"
           button
           detail
-          color="light"
           @click="openModalDetail(p)"
         >
           <ion-label>

@@ -39,22 +39,5 @@ export const usePesanan = defineStore('pesanan', {
     removePesanan(index: number) {
       this._pesanans.splice(index, 1)
     },
-    startTimer() {
-      this._pesanans.forEach((pesanan, index) => {
-        console.log(pesanan.timer)
-        if (pesanan.timer == 15) {
-          const interval = setInterval(() => {
-            if (pesanan.timer == 0) {
-              console.log(pesanan.docId + ': expired')
-              clearInterval(interval)
-              this._pesanans.splice(index, 1)
-            } else {
-              pesanan.timer -= 1
-              console.log(pesanan.docId + ': ', pesanan.timer)
-            }
-          }, 1000)
-        }
-      })
-    },
   },
 })

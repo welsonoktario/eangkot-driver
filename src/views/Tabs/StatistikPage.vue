@@ -30,7 +30,7 @@
             </ion-select>
           </ion-item>
 
-          <line
+          <Line
             v-if="!loading"
             class="ion-margin"
             ref="chart"
@@ -63,10 +63,6 @@
           <p v-else class="ion-text-center ion-margin-vertical">
             Belum ada riwayat
           </p>
-
-          <ion-item detail button @click="openModalListRiwayat()">
-            <p class="ion-text-center">Lihat lebih lengkap</p>
-          </ion-item>
         </ion-card-content>
       </ion-card>
     </template>
@@ -151,20 +147,19 @@ const loadStatistik = async () => {
   loading.value = true
   const res = await get('driver/statistik?durasi=' + durasi.value)
   const { data } = res
-  const { transaksis, pesanans } = data
   const total = []
   const jumlah = []
 
-  pesanans.value = pesanans
+  pesanans.value = data.pesanans
 
-  for (const tanggal in transaksis) {
-    const transaksi = data[tanggal]
+  for (const tanggal in data.transaksis) {
+    const transaksi = data.transaksis[tanggal]
     total.push(transaksi.total)
     jumlah.push(transaksi.transaksi)
   }
 
   chartData.value = {
-    labels: Object.keys(data),
+    labels: ['Pendapatan', 'Jumlah Pesanan'],
     datasets: [
       {
         label: 'Pendapatan',
@@ -182,9 +177,9 @@ const loadStatistik = async () => {
       },
     ],
   }
-  chart.value.update()
 
   loading.value = false
+  console.log(chart.value)
 }
 
 const handleRefresh = async (event: any) => {
