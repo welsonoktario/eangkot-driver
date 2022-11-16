@@ -18,14 +18,14 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonFooter, IonHeader, IonPage } from "@ionic/vue";
-import { useSlots } from "vue";
+import { IonContent, IonFooter, IonHeader, IonPage } from '@ionic/vue'
+import { useSlots } from 'vue'
 
 defineProps({
   transparent: Boolean,
-});
+})
 
-const slots = useSlots();
+const slots = useSlots()
 </script>
 
 <style lang="scss">

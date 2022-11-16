@@ -179,7 +179,6 @@ const loadStatistik = async () => {
   }
 
   loading.value = false
-  console.log(chart.value)
 }
 
 const handleRefresh = async (event: any) => {
