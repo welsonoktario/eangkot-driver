@@ -32,6 +32,7 @@ export const post = async (
   payload: object,
   headers: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded',
+    Accept: 'application/json',
   }
 ) => {
   const isAPI = !endpoint.includes('http')
@@ -64,6 +65,7 @@ export const patch = async (endpoint: string, payload: object) => {
   const data = keysToSnake(payload)
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
+    Accept: 'application/json',
   }
 
   if (isAPI) {
