@@ -2,15 +2,14 @@ import { FirebaseApp, initializeApp } from 'firebase/app'
 import { Firestore, getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyA5RTB9884v4aCF-SumhIDUqoWKJ-OUmfg',
-  authDomain: 'eangkot.firebaseapp.com',
-  databaseURL:
-    'https://eangkot-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'eangkot',
-  storageBucket: 'eangkot.appspot.com',
-  messagingSenderId: '660669459822',
-  appId: '1:660669459822:web:3c56d89da7da5fadb4257f',
-  measurementId: 'G-DLCMNHQ5MN',
+  apiKey: import.meta.env.FIREBASE_API_KEY,
+  authDomain: import.meta.env.FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.FIREBASE_APP_ID,
+  measurementId: import.meta.env.FIREBASE_MEASUREMENT_ID,
 }
 
 const app: FirebaseApp = initializeApp(firebaseConfig)
