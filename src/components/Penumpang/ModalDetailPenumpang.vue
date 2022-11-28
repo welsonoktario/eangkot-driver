@@ -1,11 +1,11 @@
 <template>
-  <modal-layout title="Detail Pesanan" @start-click="close()">
+  <modal-layout title="Detail Penumpang" @start-click="close()">
     <template #content>
       <div class="flex-col fill-container">
         <MapBox
           @route-loaded="onRouteLoaded"
-          :jemput="pesanan.jemput"
-          :tujuan="pesanan.tujuan"
+          :jemput="penumpang.jemput"
+          :tujuan="penumpang.tujuan"
         />
         <IonModal
           id="modal-sheet-detail"
@@ -17,11 +17,11 @@
           :backdrop-breakpoint="0.5"
         >
           <IonContent class="ion-padding">
-            <h3>Detail Pesanan</h3>
+            <h3>Detail Penumpang</h3>
 
             <IonItem>
               <IonLabel>Nama</IonLabel>
-              <p slot="end">{{ pesanan.user.nama }}</p>
+              <p slot="end">{{ penumpang.user.nama }}</p>
             </IonItem>
             <IonItem>
               <IonLabel>Jarak</IonLabel>
@@ -31,17 +31,9 @@
               <IonLabel>Perkiraan waktu</IonLabel>
               <p slot="end">{{ duration }}</p>
             </IonItem>
-            <div class="ion-margin-top flex-row justify-between">
-              <EAButton
-                class="flex-grow"
-                color="danger"
-                fill="clear"
-                @click="handlePesanan('ditolak')"
-              >
-                Tolak
-              </EAButton>
-              <EAButton class="flex-grow" @click="handlePesanan('diterima')">
-                Terima
+            <div class="ion-margin-top">
+              <EAButton @click="handlePenumpang()" expand="block">
+                Proses
               </EAButton>
             </div>
           </IonContent>
@@ -69,16 +61,17 @@ import {
 import { computed } from '@vue/reactivity'
 import { inject, ref } from 'vue'
 
-type PesananDetailProps = {
-  pesanan: Pesanan
+type PenumpangDetailProps = {
+  penumpang: Pesanan
 }
 
-const props = defineProps<PesananDetailProps>()
+const props = defineProps<PenumpangDetailProps>()
 const db: Firestore = inject('db')
 const { authAngkot, authDocId } = useAuth()
 const penumpangs = usePenumpangs()
 const modalDetail = ref()
 const routeDetail = ref()
+console.log(props.penumpang)
 
 const distance = computed(
   () =>
@@ -93,22 +86,23 @@ const onRouteLoaded = (route: any) => {
   routeDetail.value = route
 }
 
-const handlePesanan = async (aksi: 'ditolak' | 'diterima') => {
-  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.pesanan.docId}`
+const handlePenumpang = async () => {
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
-    status: aksi,
+    status: 'dijemput',
   })
 
-  penumpangs.addPenumpang(props.pesanan)
+  penumpangs.addPenumpang(props.penumpang)
 
   await close()
 }
 
 const close = async () => {
-  await modalController.dismiss(null, null, 'modal-sheet-detail')
-  await modalController.dismiss(null, null, 'modal-detail-pesanan')
+  await modalController.dismiss()
+  // await modalController.dismiss(null, null, 'modal-sheet-detail')
+  // await modalController.dismiss(null, null, 'modal-detail-penumpang')
 }
 </script>
 
@@ -118,22 +112,8 @@ const close = async () => {
   flex-direction: column;
 }
 
-.flex-row {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-}
-
-.flex-grow {
-  flex-grow: 1;
-}
-
 .fill-container {
   height: 100%;
   width: 100%;
-}
-
-.justify-between {
-  justify-content: space-between;
 }
 </style>

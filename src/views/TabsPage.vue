@@ -8,6 +8,11 @@
           <ion-label>Home</ion-label>
         </ion-tab-button>
 
+        <ion-tab-button tab="penumpang" href="/tabs/penumpang">
+          <ion-icon :icon="car" />
+          <ion-label>Penumpang</ion-label>
+        </ion-tab-button>
+
         <ion-tab-button tab="statistik" href="/tabs/statistik">
           <ion-icon :icon="statsChart" />
           <ion-label>Statistik</ion-label>
@@ -29,13 +34,13 @@
 
 <script lang="ts" setup>
 import {
+  IonIcon,
+  IonLabel,
+  IonPage,
+  IonRouterOutlet,
   IonTabBar,
   IonTabButton,
   IonTabs,
-  IonLabel,
-  IonIcon,
-  IonPage,
-  IonRouterOutlet,
-} from "@ionic/vue";
-import { car, home, person, statsChart } from "ionicons/icons";
+} from '@ionic/vue'
+import { car, home, person, statsChart } from 'ionicons/icons'
 </script>

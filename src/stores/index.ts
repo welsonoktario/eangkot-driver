@@ -1,4 +1,5 @@
 export * from './auth'
+export * from './penumpangs'
 export * from './pesanan'
 export * from './riwayat'
 export * from './trayek'

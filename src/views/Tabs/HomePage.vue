@@ -10,7 +10,7 @@
           <ion-icon :icon="power" />
         </e-a-button>
         <div class="fill">
-          <h1 class="ion-no-margin">{{ isActive ? "Online" : "Offline" }}</h1>
+          <h1 class="ion-no-margin">{{ isActive ? 'Online' : 'Offline' }}</h1>
         </div>
         <e-a-button class="btn-pesanan" @click="openModalPesanan()">
           <ion-icon :icon="receipt" />
@@ -25,7 +25,9 @@
           <ion-col>
             <div
               id="map"
-              :style="[isLoaded ? { visibility: 'visible' } : { visibility: 'hidden' }]"
+              :style="[
+                isLoaded ? { visibility: 'visible' } : { visibility: 'hidden' },
+              ]"
             ></div>
           </ion-col>
         </ion-row>
@@ -35,12 +37,12 @@
 </template>
 
 <script setup lang="ts">
-import EAButton from "@/components/EAButton.vue";
-import ModalPesanan from "@/components/Home/ModalPesanan.vue";
-import AppLayout from "@/layouts/AppLayout.vue";
-import { useAuth, usePesanan } from "@/stores";
-import { PesananFB as Pesanan } from "@/types";
-import { Geolocation } from "@capacitor/geolocation";
+import EAButton from '@/components/EAButton.vue'
+import ModalPesanan from '@/components/Home/ModalPesanan.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useAuth, usePenumpangs, usePesanan } from '@/stores'
+import { PesananFB as Pesanan } from '@/types'
+import { Geolocation } from '@capacitor/geolocation'
 import {
   IonBadge,
   IonCol,
@@ -49,7 +51,7 @@ import {
   IonRow,
   loadingController,
   modalController,
-} from "@ionic/vue";
+} from '@ionic/vue'
 import {
   addDoc,
   collection,
@@ -63,158 +65,165 @@ import {
   Unsubscribe,
   updateDoc,
   where,
-} from "firebase/firestore";
-import { power, receipt } from "ionicons/icons";
-import { GeolocateControl, Map, Marker } from "mapbox-gl";
-import { computed, inject, onMounted, ref } from "vue";
+} from 'firebase/firestore'
+import { power, receipt } from 'ionicons/icons'
+import { GeolocateControl, Map, Marker } from 'mapbox-gl'
+import { computed, inject, onMounted, ref } from 'vue'
 
-const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId } = useAuth();
-const pesanan = usePesanan();
-const db: Firestore = inject("db");
+const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId } =
+  useAuth()
+const pesanan = usePesanan()
+const penumpangs = usePenumpangs()
+const db: Firestore = inject('db')
 
-let map: Map;
-const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-const isLoaded = ref(false);
+let map: Map
+const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
+const isLoaded = ref(false)
 const isDark =
-  window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-const isActive = ref(false);
-const driverSnap = ref<Unsubscribe>();
-const penumpangsSnap = ref<Unsubscribe>();
-const markerLokasi = ref<Marker>();
+  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+const isActive = ref(false)
+const driverSnap = ref<Unsubscribe>()
+const pesanansSnap = ref<Unsubscribe>()
+const penumpangsSnap = ref<Unsubscribe>()
+const markerLokasi = ref<Marker>()
 
 onMounted(async () => {
-  loadDocument();
+  loadDocument()
   map = new Map({
-    container: "map",
+    container: 'map',
     style: isDark
-      ? "mapbox://styles/mapbox/dark-v10"
-      : "mapbox://styles/mapbox/light-v10", // style URL
+      ? 'mapbox://styles/mapbox/navigation-night-v1'
+      : 'mapbox://styles/mapbox/navigation-day-v1', // style URL
     center: [112.7518702, -7.2621774], // starting position [lng, lat]
     zoom: 13, // starting zoom
     accessToken,
-  });
+  })
 
-  map.on("load", async () => {
-    isLoaded.value = true;
-    map.resize();
+  map.on('load', async () => {
+    isLoaded.value = true
+    map.resize()
 
-    map.addSource("trayek", {
-      type: "geojson",
+    map.addSource('trayek', {
+      type: 'geojson',
       data: {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: [],
       },
-    });
-    map.addSource("route", {
-      type: "geojson",
+    })
+    map.addSource('route', {
+      type: 'geojson',
       data: {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: [],
       },
-    });
+    })
     map.addLayer({
-      id: "trayek",
-      type: "line",
-      source: "trayek",
+      id: 'trayek',
+      type: 'line',
+      source: 'trayek',
       layout: {
-        "line-join": "round",
-        "line-cap": "round",
+        'line-join': 'round',
+        'line-cap': 'round',
       },
       paint: {
-        "line-color": "#36817b",
-        "line-width": 2,
+        'line-color': '#36817b',
+        'line-width': 2,
       },
-    });
+    })
     map.addLayer({
-      id: "route",
-      type: "line",
-      source: "route",
+      id: 'route',
+      type: 'line',
+      source: 'route',
       layout: {
-        "line-join": "round",
-        "line-cap": "round",
+        'line-join': 'round',
+        'line-cap': 'round',
       },
       paint: {
-        "line-color": "#000",
-        "line-width": 2,
+        'line-color': '#000',
+        'line-width': 2,
       },
-    });
-  });
+    })
+  })
 
-  map.addControl(new GeolocateControl(), "bottom-right");
+  map.addControl(new GeolocateControl(), 'bottom-right')
 
   window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", (event) => {
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', (event) => {
       event.matches
-        ? map.setStyle("mapbox://styles/mapbox/dark-v10")
-        : map.setStyle("mapbox://styles/mapbox/light-v10");
-    });
-});
+        ? map.setStyle('mapbox://styles/mapbox/dark-v10')
+        : map.setStyle('mapbox://styles/mapbox/light-v10')
+    })
+})
 
 const penumpangCount = computed(() =>
   pesanan.pesanans ? pesanan.pesanans.length : null
-);
+)
 
 const loadDocument = async () => {
-  const geo = await Geolocation.getCurrentPosition();
-  const lokasi = geo.coords;
+  const geo = await Geolocation.getCurrentPosition()
+  const lokasi = geo.coords
 
   const q = query(
     collection(db, `angkots-${authAngkot.trayek.kode}`),
-    where("id", "==", authAngkot.id)
-  );
-  const querySnapshot = await getDocs(q);
+    where('id', '==', authAngkot.id)
+  )
+  const querySnapshot = await getDocs(q)
   querySnapshot.forEach((doc) => {
-    setAngkotDocId(doc.id);
-  });
+    setAngkotDocId(doc.id)
+  })
 
   if (authDocId) {
-    const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId);
+    const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId)
 
     driverSnap.value = onSnapshot(docRef, (doc) => {
       if (doc.exists()) {
-        const data = doc.data();
-        isActive.value = true;
+        const data = doc.data()
+        isActive.value = true
 
         if (!markerLokasi.value) {
           markerLokasi.value = new Marker()
             .setLngLat([lokasi.longitude, lokasi.latitude])
-            .addTo(map);
+            .addTo(map)
           map.flyTo({
             animate: true,
             center: markerLokasi.value.getLngLat(),
-          });
+          })
         } else {
-          markerLokasi.value.setLngLat([data.lokasi.longitude, data.lokasi.latitude]);
+          markerLokasi.value.setLngLat([
+            data.lokasi.longitude,
+            data.lokasi.latitude,
+          ])
         }
       } else {
         if (markerLokasi.value) {
-          markerLokasi.value.remove();
+          markerLokasi.value.remove()
         }
       }
-    });
+    })
 
-    await watchPenumpang();
+    await watchPesanan()
+    await watchPenumpang()
   }
-};
+}
 
 // ini susah 🫠
 const setOnline = async () => {
-  let watch: any;
+  let watch: any
   const loading = await loadingController.create({
     animated: true,
-    message: "Loading...",
+    message: 'Loading...',
     backdropDismiss: false,
-  });
+  })
 
-  await loading.present();
+  await loading.present()
 
   if (!isActive.value) {
-    const geo = await Geolocation.getCurrentPosition();
-    const lokasi = geo.coords;
+    const geo = await Geolocation.getCurrentPosition()
+    const lokasi = geo.coords
 
     try {
-      const colRef = collection(db, `angkots-${authAngkot.trayek.kode}`);
+      const colRef = collection(db, `angkots-${authAngkot.trayek.kode}`)
       const adr = await addDoc(colRef, {
         id: authAngkot.id,
         driver: {
@@ -224,91 +233,114 @@ const setOnline = async () => {
         },
         noKendaraan: authAngkot.noKendaraan,
         lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
-      });
+      })
 
-      setAngkotDocId(adr.id);
-      isActive.value = true;
-      const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, adr.id);
+      setAngkotDocId(adr.id)
+      isActive.value = true
+      const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, adr.id)
 
       markerLokasi.value = new Marker()
         .setLngLat([lokasi.longitude, lokasi.latitude])
-        .addTo(map);
+        .addTo(map)
       map.flyTo({
         animate: true,
         center: markerLokasi.value.getLngLat(),
-      });
+      })
 
       // watch pergerakan angkot
       watch = await Geolocation.watchPosition(
         { enableHighAccuracy: true, timeout: 1000 },
         (pos) => {
           if (pos) {
-            const lokasi = pos.coords;
+            const lokasi = pos.coords
             updateDoc(docRef, {
               lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
-            });
+            })
           }
         }
-      );
+      )
     } catch (e: any) {
-      console.error(e);
+      console.error(e)
     }
   } else {
-    markerLokasi.value.remove();
+    markerLokasi.value.remove()
 
     try {
       const colRef = collection(
         db,
         `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
-      );
-      const snapshots = await getDocs(colRef);
+      )
+      const q = query(colRef, where('status', '==', 'pending'))
+      const snapshots = await getDocs(q)
 
       if (!snapshots.empty) {
-        alert("Masi ada penumpang");
+        alert('Masi ada penumpang')
       } else {
-        await deleteDoc(doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId));
+        await deleteDoc(doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId))
 
         // hapus watch pergerakan angkot
         if (watch) {
-          await Geolocation.clearWatch({ id: watch });
+          await Geolocation.clearWatch({ id: watch })
         }
-        isActive.value = false;
+        isActive.value = false
       }
     } catch (e: any) {
-      console.error(e);
+      console.error(e)
     }
   }
 
-  loading.dismiss();
-};
+  loading.dismiss()
+}
 
 const openModalPesanan = async () => {
   const modal = await modalController.create({
     component: ModalPesanan,
-  });
+  })
 
-  await modal.present();
-};
+  await modal.present()
+}
+
+const watchPesanan = async () => {
+  const colRef = collection(
+    db,
+    `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
+  )
+  const q = query(colRef, where('status', '==', 'pending'))
+
+  pesanansSnap.value = onSnapshot(q, (doc) => {
+    const data = doc.docs.map((d) => {
+      const data = d.data()
+      data.jemput = [data.jemput.longitude, data.jemput.latitude]
+      data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
+      data.docId = d.id
+
+      return data
+    }) as Pesanan[]
+
+    pesanan.setPesanans(data)
+  })
+}
 
 const watchPenumpang = async () => {
   const colRef = collection(
     db,
     `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
-  );
+  )
+  const q = query(colRef, where('status', '==', 'diterima'))
 
-  penumpangsSnap.value = onSnapshot(colRef, (doc) => {
+  penumpangsSnap.value = onSnapshot(q, (doc) => {
     const data = doc.docs.map((d) => {
-      const data = d.data();
-      data.jemput = [data.jemput.longitude, data.jemput.latitude];
-      data.tujuan = [data.tujuan.longitude, data.tujuan.latitude];
-      data.docId = d.id;
+      const data = d.data()
+      data.jemput = [data.jemput.longitude, data.jemput.latitude]
+      data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
+      data.docId = d.id
 
-      return data;
-    }) as Pesanan[];
+      return data
+    }) as Pesanan[]
 
-    pesanan.setPesanans(data);
-  });
-};
+    penumpangs.setPenumpangs(data)
+  })
+}
 </script>
 
 <style lang="scss" scoped>

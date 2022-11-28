@@ -32,6 +32,7 @@ const close = async () => await modalController.dismiss()
 
 const openModalDetail = async (p: Pesanan) => {
   const modal = await modalController.create({
+    id: 'modal-detail-pesanan',
     component: ModalDetailPesanan,
     componentProps: {
       pesanan: p,
