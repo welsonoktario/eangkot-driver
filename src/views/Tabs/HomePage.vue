@@ -40,6 +40,7 @@
 import EAButton from '@/components/EAButton.vue'
 import ModalPesanan from '@/components/Home/ModalPesanan.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { patch } from '@/lib'
 import { useAuth, usePenumpangs, usePesanan } from '@/stores'
 import { PesananFB as Pesanan } from '@/types'
 import { Geolocation } from '@capacitor/geolocation'
@@ -168,42 +169,39 @@ const loadDocument = async () => {
     collection(db, `angkots-${authAngkot.trayek.kode}`),
     where('id', '==', authAngkot.id)
   )
-  const querySnapshot = await getDocs(q)
-  querySnapshot.forEach((doc) => {
-    setAngkotDocId(doc.id)
-  })
 
-  if (authDocId) {
-    const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId)
+  try {
+    const querySnapshot = await getDocs(q)
 
-    driverSnap.value = onSnapshot(docRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data()
-        isActive.value = true
+    if (querySnapshot.docs.length == 1) {
+      const data = querySnapshot.docs[0].data()
+      isActive.value = true
 
-        if (!markerLokasi.value) {
-          markerLokasi.value = new Marker()
-            .setLngLat([lokasi.longitude, lokasi.latitude])
-            .addTo(map)
-          map.flyTo({
-            animate: true,
-            center: markerLokasi.value.getLngLat(),
-          })
-        } else {
-          markerLokasi.value.setLngLat([
-            data.lokasi.longitude,
-            data.lokasi.latitude,
-          ])
-        }
+      if (!markerLokasi.value) {
+        markerLokasi.value = new Marker()
+          .setLngLat([lokasi.longitude, lokasi.latitude])
+          .addTo(map)
+        map.flyTo({
+          animate: true,
+          center: markerLokasi.value.getLngLat(),
+        })
       } else {
-        if (markerLokasi.value) {
-          markerLokasi.value.remove()
-        }
+        markerLokasi.value.setLngLat([
+          data.lokasi.longitude,
+          data.lokasi.latitude,
+        ])
       }
-    })
 
-    await watchPesanan()
-    await watchPenumpang()
+      await updateDocId(querySnapshot.docs[0].id)
+      await watchPesanan()
+      await watchPenumpang()
+    } else {
+      if (markerLokasi.value) {
+        markerLokasi.value.remove()
+      }
+    }
+  } catch (e: any) {
+    console.error('[loadDocument]: ', e)
   }
 }
 
@@ -298,6 +296,13 @@ const openModalPesanan = async () => {
   })
 
   await modal.present()
+}
+
+const updateDocId = async (id: string) => {
+  const res = await patch(`angkot/${authAngkot.id}/doc`, {
+    docId: id,
+  })
+  console.log(res.data)
 }
 
 const watchPesanan = async () => {

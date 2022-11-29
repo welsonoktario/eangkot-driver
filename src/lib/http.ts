@@ -1,6 +1,6 @@
+import { keysToSnake } from '@/utils'
 import { CapacitorHttp as Http, HttpOptions } from '@capacitor/core'
 import { Preferences } from '@capacitor/preferences'
-import { keysToSnake } from './bodySerializer'
 
 const API_URL = import.meta.env.VITE_API_URL
 

@@ -24,8 +24,8 @@ import '@ionic/vue/css/text-transformation.css'
 /* Theme variables */
 import './theme/variables.scss'
 
+import { db } from '@/lib'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { db } from './utils/firebase'
 
 const app = createApp(App)
   .use(IonicVue)

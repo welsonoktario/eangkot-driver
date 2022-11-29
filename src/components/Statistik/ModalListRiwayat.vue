@@ -21,8 +21,8 @@
 import CardRiwayat from '@/components/Statistik/CardRiwayat.vue'
 import ModalDetailRiwayat from '@/components/Statistik/ModalDetailRiwayat.vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
+import { get } from '@/lib'
 import { Pesanan } from '@/types'
-import { get } from '@/utils/http'
 import { IonList, IonSpinner, modalController } from '@ionic/vue'
 import { onMounted, ref } from 'vue'
 

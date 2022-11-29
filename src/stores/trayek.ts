@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import { defineStore } from "pinia";
 import { Trayek } from "@/types";
-import { get } from "@/utils/http";
+import { get } from "@/lib/http";
 
 export const useTrayek = defineStore("trayek", {
   state: () =>

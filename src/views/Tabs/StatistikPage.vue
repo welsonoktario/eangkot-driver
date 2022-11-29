@@ -71,7 +71,7 @@ import ListRiwayat from "@/components/Statistik/ListRiwayat.vue";
 import ModalListRiwayat from "@/components/Statistik/ModalListRiwayat.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { Transaksi } from "@/types";
-import { get } from "@/utils/http";
+import { get } from "@/lib";
 import {
   IonCard,
   IonCardContent,

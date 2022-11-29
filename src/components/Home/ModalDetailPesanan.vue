@@ -36,11 +36,14 @@
                 class="flex-grow"
                 color="danger"
                 fill="clear"
-                @click="handlePesanan('ditolak')"
+                @click="handlePesanan(StatusPesanan.CANCEL)"
               >
                 Tolak
               </EAButton>
-              <EAButton class="flex-grow" @click="handlePesanan('diterima')">
+              <EAButton
+                class="flex-grow"
+                @click="handlePesanan(StatusPesanan.ACCEPT)"
+              >
                 Terima
               </EAButton>
             </div>
@@ -56,7 +59,7 @@ import EAButton from '@/components/EAButton.vue'
 import MapBox from '@/components/MapBox.vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useAuth, usePenumpangs } from '@/stores'
-import { PesananFB as Pesanan } from '@/types'
+import { PesananFB as Pesanan, StatusPesanan } from '@/types'
 import { forHumans } from '@/utils/dateUtil'
 import { doc, Firestore, updateDoc } from '@firebase/firestore'
 import {
@@ -93,7 +96,7 @@ const onRouteLoaded = (route: any) => {
   routeDetail.value = route
 }
 
-const handlePesanan = async (aksi: 'ditolak' | 'diterima') => {
+const handlePesanan = async (aksi: StatusPesanan) => {
   const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.pesanan.docId}`
   const docRef = doc(db, docPath)
 

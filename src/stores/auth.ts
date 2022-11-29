@@ -1,6 +1,6 @@
 import { Angkot } from '@/types'
 import { User } from '@/types/user'
-import { patch, post } from '@/utils/http'
+import { patch, post } from '@/lib/http'
 import { Preferences } from '@capacitor/preferences'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
