@@ -1,4 +1,5 @@
 export * from './angkot'
+export * from './penumpang'
 export * from './pesanan'
 export * from './statusPesanan'
 export * from './transaksi'

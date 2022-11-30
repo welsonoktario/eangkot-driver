@@ -32,8 +32,19 @@
               <p slot="end">{{ duration }}</p>
             </IonItem>
             <div class="ion-margin-top">
-              <EAButton @click="handlePenumpang()" expand="block">
-                Proses
+              <EAButton
+                @click="
+                  penumpang.status == StatusPesanan.PROCESS
+                    ? selesaiPenumpang()
+                    : handlePenumpang()
+                "
+                expand="block"
+              >
+                {{
+                  penumpang.status == StatusPesanan.PROCESS
+                    ? 'Selesai'
+                    : 'Proses'
+                }}
               </EAButton>
             </div>
           </IonContent>
@@ -48,7 +59,7 @@ import EAButton from '@/components/EAButton.vue'
 import MapBox from '@/components/MapBox.vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useAuth, usePenumpangs } from '@/stores'
-import { PesananFB as Pesanan } from '@/types'
+import { PesananFB as Pesanan, StatusPesanan } from '@/types'
 import { forHumans } from '@/utils/dateUtil'
 import { doc, Firestore, updateDoc } from '@firebase/firestore'
 import {
@@ -71,7 +82,6 @@ const { authAngkot, authDocId } = useAuth()
 const penumpangs = usePenumpangs()
 const modalDetail = ref()
 const routeDetail = ref()
-console.log(props.penumpang)
 
 const distance = computed(
   () =>
@@ -91,10 +101,23 @@ const handlePenumpang = async () => {
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
-    status: 'dijemput',
+    status: StatusPesanan.PROCESS,
   })
 
   penumpangs.addPenumpang(props.penumpang)
+
+  await close()
+}
+
+const selesaiPenumpang = async () => {
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
+  const docRef = doc(db, docPath)
+
+  await updateDoc(docRef, {
+    status: StatusPesanan.DONE,
+  })
+
+  penumpangs.removePenumpang(props.penumpang)
 
   await close()
 }

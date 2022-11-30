@@ -42,7 +42,7 @@ import ModalPesanan from '@/components/Home/ModalPesanan.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { patch } from '@/lib'
 import { useAuth, usePenumpangs, usePesanan } from '@/stores'
-import { PesananFB as Pesanan } from '@/types'
+import { PesananFB as Pesanan, StatusPesanan } from '@/types'
 import { Geolocation } from '@capacitor/geolocation'
 import {
   IonBadge,
@@ -331,9 +331,13 @@ const watchPenumpang = async () => {
     db,
     `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
   )
-  const q = query(colRef, where('status', '==', 'diterima'))
+  const q = query(
+    colRef,
+    where('status', 'in', [StatusPesanan.ACCEPT, StatusPesanan.PROCESS])
+  )
 
   penumpangsSnap.value = onSnapshot(q, (doc) => {
+    console.log(doc.docs)
     const data = doc.docs.map((d) => {
       const data = d.data()
       data.jemput = [data.jemput.longitude, data.jemput.latitude]

@@ -1,4 +1,5 @@
 import { LngLatLike } from 'mapbox-gl'
+import { StatusPesanan } from './statusPesanan'
 import { Transaksi } from './transaksi'
 import { User } from './user'
 
@@ -6,7 +7,7 @@ export type PesananFB = {
   docId: string
   jemput: LngLatLike
   tujuan: LngLatLike
-  status: string
+  status: StatusPesanan
   tanggal: string
   user?: User
   timer: number
