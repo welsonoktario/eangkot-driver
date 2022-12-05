@@ -38,10 +38,6 @@
             ></ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">NIK KTP (16 angka)</ion-label>
-            <ion-input required v-model="form.nik" type="tel"></ion-input>
-          </ion-item>
-          <ion-item>
             <ion-label position="floating">Trayek Pilihan</ion-label>
             <ion-select v-model="form.trayek">
               <ion-select-option
@@ -56,11 +52,7 @@
             <ion-item class="ion-margin-top">
               <ion-label position="stacked">Foto KTP</ion-label>
               <div>
-                <img
-                  v-if="detail.ktp.webPath"
-                  :src="detail.ktp.webPath"
-                  width="200"
-                />
+                <img v-if="ktp.webPath" :src="ktp.webPath" width="200" />
                 <e-a-button
                   @click="takePhoto('ktp')"
                   expand="block"
@@ -73,11 +65,7 @@
             <ion-item class="ion-margin-top">
               <ion-label position="stacked">Foto SIM</ion-label>
               <div>
-                <img
-                  v-if="detail.sim.webPath"
-                  :src="detail.sim.webPath"
-                  width="200"
-                />
+                <img v-if="sim.webPath" :src="sim.webPath" width="200" />
                 <e-a-button
                   @click="takePhoto('sim')"
                   expand="block"
@@ -103,51 +91,46 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
-import { useAuth, useTrayek } from "@/stores";
-import { Camera, CameraSource, CameraResultType } from "@capacitor/camera";
-import { Dialog } from "@capacitor/dialog";
+import AppBar from '@/components/AppBar.vue'
+import EAButton from '@/components/EAButton.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useAuth, useTrayek } from '@/stores'
+import { HTTP } from '@awesome-cordova-plugins/http'
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { Dialog } from '@capacitor/dialog'
 import {
-  IonGrid,
-  IonRow,
   IonCol,
+  IonGrid,
   IonIcon,
-  IonList,
+  IonInput,
   IonItem,
   IonLabel,
-  IonInput,
+  IonList,
+  IonRow,
   IonSelect,
   IonSelectOption,
-} from "@ionic/vue";
-import AppBar from "@/components/AppBar.vue";
-import { checkmarkCircle } from "ionicons/icons";
-import EAButton from "@/components/EAButton.vue";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-import Http from "cordova-plugin-advanced-http";
-import AppLayout from "@/layouts/AppLayout.vue";
+} from '@ionic/vue'
+import { checkmarkCircle } from 'ionicons/icons'
+import { onMounted, ref } from 'vue'
 
-const auth = useAuth();
-const trayek = useTrayek();
-const detail = ref({
-  ktp: {
-    filePath: "",
-    webPath: "",
-  },
-  sim: {
-    filePath: "",
-    webPath: "",
-  },
-});
-const form = reactive({
-  alamat: "",
-  nik: "",
-  trayek: "",
-});
-const terkirim = ref(false);
-type PhotoType = "ktp" | "sim";
+const auth = useAuth()
+const trayek = useTrayek()
+const ktp = ref({
+  filePath: '',
+  webPath: '',
+})
+const sim = ref({
+  filePath: '',
+  webPath: '',
+})
+const form = ref({
+  alamat: '',
+  trayek: '',
+})
+const terkirim = ref(false)
+type PhotoType = 'ktp' | 'sim'
 
-onMounted(async () => await trayek.loadTrayeks());
+onMounted(async () => await trayek.loadTrayeks())
 
 const takePhoto = async (type: PhotoType) => {
   const img = await Camera.getPhoto({
@@ -155,42 +138,56 @@ const takePhoto = async (type: PhotoType) => {
     allowEditing: true,
     source: CameraSource.Camera,
     resultType: CameraResultType.Uri,
-  });
+  })
 
-  detail.value[type].webPath = img.webPath;
-  detail.value[type].filePath = img.path;
-};
+  if (type == 'ktp') {
+    ktp.value = {
+      webPath: img.webPath,
+      filePath: img.path,
+    }
+  } else {
+    sim.value = {
+      webPath: img.webPath,
+      filePath: img.path,
+    }
+  }
+}
 
 const kirim = async () => {
-  const url = import.meta.env.VITE_API_URL;
-  const filePaths = [detail.value.ktp.filePath, detail.value.sim.filePath];
-  const names = ["ktp", "sim"];
+  const url = import.meta.env.VITE_API_URL
+  const filePaths = [ktp.value.filePath, sim.value.filePath]
+  const names = ['ktp', 'sim']
 
-  Http.uploadFile(
-    url,
-    filePaths,
-    names,
-    {
-      Authorization: auth.authToken,
-    },
-    async (res: any) => {
-      console.log(res);
-      const data = res.data;
-      if (data.status === "OK") {
-        terkirim.value = true;
-      } else if (data.status === "FAIL") {
-        await Dialog.alert({
-          title: "Error",
-          message: data.msg,
-        });
-      }
-    },
-    async (err: any) => {
+  try {
+    const res = await HTTP.uploadFile(
+      url,
+      form.value,
+      {
+        Accept: 'application/json',
+        Authorization: auth.authToken,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      filePaths,
+      names
+    )
+
+    console.log(res)
+    const data = res.data
+
+    if (data.status === 'OK') {
+      terkirim.value = true
+    } else if (data.status === 'FAIL') {
       await Dialog.alert({
-        title: "Error",
-        message: err.data.msg,
-      });
+        title: 'Error',
+        message: data.msg,
+      })
     }
-  );
-};
+  } catch (e: any) {
+    console.log(e)
+    await Dialog.alert({
+      title: 'Error',
+      message: e.data.msg,
+    })
+  }
+}
 </script>

@@ -104,7 +104,7 @@ const handlePesanan = async (aksi: StatusPesanan) => {
     status: aksi,
   })
 
-  penumpangs.addPenumpang(props.pesanan)
+  aksi == StatusPesanan.ACCEPT && penumpangs.addPenumpang(props.pesanan)
 
   await close()
 }

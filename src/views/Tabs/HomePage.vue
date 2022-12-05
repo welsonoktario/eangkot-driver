@@ -205,7 +205,6 @@ const loadDocument = async () => {
   }
 }
 
-// ini susah 🫠
 const setOnline = async () => {
   let watch: any
   const loading = await loadingController.create({
@@ -245,7 +244,6 @@ const setOnline = async () => {
         center: markerLokasi.value.getLngLat(),
       })
 
-      // watch pergerakan angkot
       watch = await Geolocation.watchPosition(
         { enableHighAccuracy: true, timeout: 1000 },
         (pos) => {
@@ -272,14 +270,11 @@ const setOnline = async () => {
       const snapshots = await getDocs(q)
 
       if (!snapshots.empty) {
-        alert('Masi ada penumpang')
+        alert('Tidak dapat menonaktifkan angkot. Masih terdapat ada penumpang')
       } else {
         await deleteDoc(doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId))
 
-        // hapus watch pergerakan angkot
-        if (watch) {
-          await Geolocation.clearWatch({ id: watch })
-        }
+        watch && (await Geolocation.clearWatch({ id: watch }))
         isActive.value = false
       }
     } catch (e: any) {
