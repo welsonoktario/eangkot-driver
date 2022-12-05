@@ -1,4 +1,4 @@
-import { PesananFB as Pesanan } from '@/types'
+import { PesananFB as Pesanan, StatusPesanan } from '@/types'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
@@ -20,6 +20,12 @@ export const usePenumpangs = defineStore('penumpangs', {
     },
     addPenumpang(penumpang: Pesanan) {
       this._penumpangs.push(penumpang)
+    },
+    updatePenumpang(penumpang: Pesanan, status: StatusPesanan) {
+      const index = this._penumpangs.findIndex(
+        (p: Pesanan) => p.docId === penumpang.docId
+      )
+      this._penumpangs[index].status = status
     },
     removePenumpang(penumpang: Pesanan) {
       this._penumpangs = this._penumpangs.filter(
