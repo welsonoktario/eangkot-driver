@@ -97,7 +97,6 @@ const drawRoute = async () => {
 
     const bounds = new LngLatBounds(route[0], route[0])
 
-    // Extend the 'LngLatBounds' to include every coordinate in the bounds result.
     for (const coord of route) {
       bounds.extend(coord)
     }

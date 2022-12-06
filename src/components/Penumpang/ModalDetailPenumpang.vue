@@ -36,7 +36,7 @@
                 @click="
                   penumpang.status == StatusPesanan.PROCESS
                     ? selesaiPenumpang()
-                    : handlePenumpang()
+                    : prosesPenumpang()
                 "
                 expand="block"
               >
@@ -96,7 +96,7 @@ const onRouteLoaded = (route: any) => {
   routeDetail.value = route
 }
 
-const handlePenumpang = async () => {
+const prosesPenumpang = async () => {
   const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
   const docRef = doc(db, docPath)
 
@@ -104,7 +104,7 @@ const handlePenumpang = async () => {
     status: StatusPesanan.PROCESS,
   })
 
-  penumpangs.addPenumpang(props.penumpang)
+  penumpangs.updatePenumpang(props.penumpang, StatusPesanan.PROCESS)
 
   await close()
 }
