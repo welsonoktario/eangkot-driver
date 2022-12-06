@@ -27,7 +27,7 @@
 import EAButton from '@/components/EAButton.vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useAuth } from '@/stores'
-import { Dialog } from '@capacitor/dialog'
+import { showDialog } from '@/utils'
 import { IonLabel, modalController } from '@ionic/vue'
 import { onMounted, ref } from 'vue'
 import VOtpInput from 'vue3-otp-input'
@@ -60,7 +60,7 @@ const checkOtp = async () => {
   if (data.msg) {
     await modalController.dismiss(true)
   } else {
-    await Dialog.alert({
+    await showDialog({
       title: 'Error',
       message: 'Kode OTP tidak cocok',
     })

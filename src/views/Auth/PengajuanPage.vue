@@ -95,9 +95,9 @@ import AppBar from '@/components/AppBar.vue'
 import EAButton from '@/components/EAButton.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { useAuth, useTrayek } from '@/stores'
+import { showDialog } from '@/utils'
 import { HTTP } from '@awesome-cordova-plugins/http'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
-import { Dialog } from '@capacitor/dialog'
 import {
   IonCol,
   IonGrid,
@@ -177,14 +177,14 @@ const kirim = async () => {
     if (data.status === 'OK') {
       terkirim.value = true
     } else if (data.status === 'FAIL') {
-      await Dialog.alert({
+      await showDialog({
         title: 'Error',
         message: data.msg,
       })
     }
   } catch (e: any) {
     console.log(e)
-    await Dialog.alert({
+    await showDialog({
       title: 'Error',
       message: e.data.msg,
     })

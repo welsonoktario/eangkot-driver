@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+import { showToast } from '@/utils';
 import { Geolocation } from '@capacitor/geolocation'
 import { LngLatBounds, LngLatLike, Map, Marker, Popup } from 'mapbox-gl'
 import { onMounted, onUnmounted, ref } from 'vue'
@@ -138,7 +139,7 @@ const fetchRoute = async (jemput: string, tujuan: string) => {
 
     return json
   } catch (e: any) {
-    console.error('[fetchRoute] Failed to fetch route: ', e)
+    await showToast('Terjadi kesalahan mengambil data rotute', 'danger')
   }
 }
 
@@ -150,7 +151,7 @@ const fetchAddres = async (lngLat: LngLatLike) => {
     )
     return await res.json()
   } catch (e: any) {
-    console.error('[fetchAddress] Error fetching address: ', e)
+    await showToast('Terjadi kesalahan mengambil data alamat', 'danger')
   }
 }
 

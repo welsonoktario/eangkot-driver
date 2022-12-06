@@ -43,6 +43,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { patch } from '@/lib'
 import { useAuth, usePenumpangs, usePesanan } from '@/stores'
 import { PesananFB as Pesanan, StatusPesanan } from '@/types'
+import { showToast } from '@/utils'
 import { Geolocation } from '@capacitor/geolocation'
 import {
   IonBadge,
@@ -201,7 +202,7 @@ const loadDocument = async () => {
       }
     }
   } catch (e: any) {
-    console.error('[loadDocument]: ', e)
+    await showToast('Terjadi kesalahan memuat data angkot', 'danger')
   }
 }
 
@@ -256,7 +257,7 @@ const setOnline = async () => {
         }
       )
     } catch (e: any) {
-      console.error(e)
+      await showToast('Terjadi kesalahan mengaktifkan angkot', 'danger')
     }
   } else {
     markerLokasi.value.remove()
@@ -278,7 +279,7 @@ const setOnline = async () => {
         isActive.value = false
       }
     } catch (e: any) {
-      console.error(e)
+      await showToast('Terjadi kesalahan menonaktifkan angkot', 'danger')
     }
   }
 
