@@ -28,6 +28,7 @@ export const useAuth = defineStore('auth', {
       angkot: undefined,
       docId: '',
     } as AuthState),
+  persist: true,
   getters: {
     authUser: (state) => state.user,
     authToken: (state) => state.token,
@@ -42,10 +43,17 @@ export const useAuth = defineStore('auth', {
       Preferences.set({ key: 'docId', value: id })
     },
     async setAuthUser(user: any, token: string = null) {
+      console.log(user)
       this.user = user
 
       await Preferences.remove({ key: 'user' })
       await Preferences.set({ key: 'user', value: JSON.stringify(this.user) })
+
+      if (user.driver) {
+        this.driver = user.driver?.id
+        this.angkot = user.driver?.angkot
+        this.docId = user.driver?.angkot?.docId
+      }
 
       /* if (user.driver) {
         this.driver = user.driver.id
@@ -74,25 +82,19 @@ export const useAuth = defineStore('auth', {
     async checkAuthStatus() {
       const authStatus = {
         user: AuthStatus.LOGGED_ID,
-        driver: AuthStatus.LOGGED_ID
+        driver: AuthStatus.LOGGED_ID,
       }
 
-      const userKeys = ['user', 'token']
-      const driverKeys = ['driver', 'angkot']
+      const keys = ['user', 'token']
 
       const userPrefs = await Promise.all([
         Preferences.get({ key: 'user' }),
         Preferences.get({ key: 'token' }),
       ])
 
-      const driverPrefs = await Promise.all([
-        Preferences.get({ key: 'driver' }),
-        Preferences.get({ key: 'angkot' }),
-      ])
-
       userPrefs.forEach((pref, i) => {
         const { value } = pref
-        const key = userKeys[i]
+        const key = keys[i]
 
         if (value && value !== 'null') {
           key === 'user' ? (this[key] = JSON.parse(value)) : (this[key] = value)
@@ -101,18 +103,10 @@ export const useAuth = defineStore('auth', {
         }
       })
 
-      driverPrefs.forEach((pref, i) => {
-        const { value } = pref
-        const key = driverKeys[i]
-
-        if (value && value !== 'null') {
-          key === 'angkot'
-            ? (this[key] = JSON.parse(value))
-            : (this[key] = value)
-        } else {
-          authStatus.driver = AuthStatus.PENGAJUAN
-        }
-      })
+      if (this.user && !this.user.driver) {
+        console.log(this.user)
+        authStatus.driver = AuthStatus.PENGAJUAN
+      }
 
       const { value } = await Preferences.get({ key: 'docId' })
       this.docId = value

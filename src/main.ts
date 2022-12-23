@@ -1,4 +1,5 @@
 import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -27,10 +28,11 @@ import './theme/variables.scss'
 import { db } from '@/lib'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+const pinia = createPinia().use(piniaPluginPersistedstate)
 const app = createApp(App)
   .use(IonicVue)
   .use(router)
-  .use(createPinia())
+  .use(pinia)
   .provide('db', db)
 
 router.isReady().then(() => {

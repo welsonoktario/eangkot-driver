@@ -76,7 +76,7 @@ const login = async () => {
   const data = await res.data
 
   if (data.msg === 'REGISTERED') {
-    await auth.setAuthUser(data.data, data.data.token)
+    await auth.setAuthUser(data.data.user, data.data.token)
     ionRouter.push('/tabs/home')
   }
 

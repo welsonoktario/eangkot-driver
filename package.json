@@ -34,6 +34,7 @@
     "ionicons": "^6.0.4",
     "mapbox-gl": "^2.11.0",
     "pinia": "^2.0.27",
+    "pinia-plugin-persistedstate": "^3.0.1",
     "vue": "^3.2.45",
     "vue-chartjs": "^4.1.2",
     "vue-router": "^4.1.6",
