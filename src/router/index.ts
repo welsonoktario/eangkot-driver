@@ -1,4 +1,4 @@
-import { useAuth } from '@/stores'
+import { AuthStatus, useAuth } from '@/stores'
 import AuthPage from '@/views/Auth/AuthPage.vue'
 import TabsPage from '@/views/TabsPage.vue'
 import { createRouter, createWebHistory } from '@ionic/vue-router'
@@ -64,6 +64,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'auth.register',
         component: () => import('../views/Auth/RegisterPage.vue'),
       },
+      {
+        path: 'pengajuan',
+        name: 'auth.pengajuan',
+        component: () => import('../views/Auth/PengajuanPage.vue'),
+      },
     ],
   },
 ]
@@ -74,12 +79,16 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from) => {
+  const auth = useAuth()
   if (!to.name.toString().includes('auth.')) {
-    const auth = useAuth()
-    const isLoggedIn = await auth.checkAuth()
+    const { user, driver } = await auth.checkAuthStatus()
 
-    if (!isLoggedIn) {
+    if (user !== AuthStatus.LOGGED_ID) {
       return { name: 'auth.login' }
+    } else {
+      if (driver === AuthStatus.PENGAJUAN) {
+        return { name: 'auth.pengajuan' }
+      }
     }
   }
 })

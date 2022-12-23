@@ -1,24 +1,30 @@
+import { patch, post } from '@/lib/http'
 import { Angkot } from '@/types'
 import { User } from '@/types/user'
-import { patch, post } from '@/lib/http'
 import { Preferences } from '@capacitor/preferences'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
 type AuthState = {
   user: User | undefined
-  driver: number | undefined
   token: string | undefined
+  driver: number | undefined
   angkot: Angkot | undefined
   docId: string
+}
+
+export enum AuthStatus {
+  NOT_LOGGED_ID = 'not-logged-in',
+  LOGGED_ID = 'logged-id',
+  PENGAJUAN = 'pengajuan',
 }
 
 export const useAuth = defineStore('auth', {
   state: () =>
     reactive({
       user: undefined,
-      driver: undefined,
       token: undefined,
+      driver: undefined,
       angkot: undefined,
       docId: '',
     } as AuthState),
@@ -35,60 +41,83 @@ export const useAuth = defineStore('auth', {
       Preferences.remove({ key: 'docId' })
       Preferences.set({ key: 'docId', value: id })
     },
-    async setAuthUser(data: any, token: string = null) {
-      this.user = data.user
-      this.driver = data.user.driver.id
-      this.angkot = data.user.driver.angkot
+    async setAuthUser(user: any, token: string = null) {
+      this.user = user
 
       await Preferences.remove({ key: 'user' })
-      await Preferences.remove({ key: 'driver' })
-      await Preferences.remove({ key: 'angkot' })
-
       await Preferences.set({ key: 'user', value: JSON.stringify(this.user) })
-      await Preferences.set({ key: 'driver', value: this.driver.toString() })
-      await Preferences.set({
-        key: 'angkot',
-        value: JSON.stringify(this.angkot),
-      })
+
+      /* if (user.driver) {
+        this.driver = user.driver.id
+        this.angkot = user.driver.angkot
+
+        await Preferences.remove({ key: 'driver' })
+        await Preferences.remove({ key: 'angkot' })
+
+        await Preferences.set({
+          key: 'driver',
+          value: JSON.stringify(this.driver),
+        })
+        await Preferences.set({
+          key: 'angkot',
+          value: JSON.stringify(this.angkot),
+        })
+      } */
 
       if (token) {
         this.token = token
+
         await Preferences.remove({ key: 'token' })
         await Preferences.set({ key: 'token', value: token })
       }
     },
-    async checkAuth() {
-      let isAuthenticated = true
-      const keys = ['user', 'token', 'driver', 'angkot']
-      const preferences = [
+    async checkAuthStatus() {
+      const authStatus = {
+        user: AuthStatus.LOGGED_ID,
+        driver: AuthStatus.LOGGED_ID
+      }
+
+      const userKeys = ['user', 'token']
+      const driverKeys = ['driver', 'angkot']
+
+      const userPrefs = await Promise.all([
         Preferences.get({ key: 'user' }),
         Preferences.get({ key: 'token' }),
+      ])
+
+      const driverPrefs = await Promise.all([
         Preferences.get({ key: 'driver' }),
         Preferences.get({ key: 'angkot' }),
-      ]
+      ])
 
-      const prefValues = await Promise.all(preferences)
+      userPrefs.forEach((pref, i) => {
+        const { value } = pref
+        const key = userKeys[i]
 
-      prefValues.forEach((res, i) => {
-        if (res.value && res.value !== 'null') {
-          const key = keys[i]
-          if (key === 'user' || key === 'angkot') {
-            this[key] = JSON.parse(res.value)
-          } else {
-            this[key] = res.value
-          }
+        if (value && value !== 'null') {
+          key === 'user' ? (this[key] = JSON.parse(value)) : (this[key] = value)
         } else {
-          isAuthenticated = false
+          authStatus.user = AuthStatus.NOT_LOGGED_ID
+        }
+      })
+
+      driverPrefs.forEach((pref, i) => {
+        const { value } = pref
+        const key = driverKeys[i]
+
+        if (value && value !== 'null') {
+          key === 'angkot'
+            ? (this[key] = JSON.parse(value))
+            : (this[key] = value)
+        } else {
+          authStatus.driver = AuthStatus.PENGAJUAN
         }
       })
 
       const { value } = await Preferences.get({ key: 'docId' })
+      this.docId = value
 
-      if (value) {
-        this.docId = value
-      }
-
-      return isAuthenticated
+      return authStatus
     },
     async login(phone: string) {
       return await post('auth/login', { phone, driver: true })

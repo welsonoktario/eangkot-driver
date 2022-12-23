@@ -1,33 +1,44 @@
 <template>
   <app-layout>
     <template #header>
-      <app-bar title="Riwayat" />
+      <app-bar title="Pengajuan Driver" />
     </template>
-    <ion-grid
-      style="height: 100%"
-      class="ion-margin-horizontal"
-      v-if="terkirim"
-    >
-      <ion-row
-        style="height: 100%"
-        class="ion-justify-content-center ion-align-items-center"
-      >
-        <ion-col>
-          <ion-icon
-            :name="checkmarkCircle"
-            size="large"
-            color="primary"
-          ></ion-icon>
-          <p>
-            Pengajuan berhasil dikirim. Proses pengajuan akan diproses selama
-            maksimal 3x24 jam.
-          </p>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
 
-    <template v-else>
-      <form @submit.prevent="kirim()">
+    <template #content>
+      <IonCard color="primary" class="ion-text-center">
+        <IonCardContent>
+          <ion-icon size="large" :icon="alertCircle"></ion-icon>
+          <h3 color="primary">
+            Sebelum dapat menggunakan aplikasi, anda harus mengajukan permohonan
+            menjadi pengemudi angkot.
+          </h3>
+        </IonCardContent>
+      </IonCard>
+
+      <ion-grid
+        style="height: 100%"
+        class="ion-margin-horizontal"
+        v-if="terkirim"
+      >
+        <ion-row
+          style="height: 100%"
+          class="ion-justify-content-center ion-align-items-center"
+        >
+          <ion-col>
+            <ion-icon
+              :name="checkmarkCircle"
+              size="large"
+              color="primary"
+            ></ion-icon>
+            <p>
+              Pengajuan berhasil dikirim. Proses pengajuan akan diproses selama
+              maksimal 3x24 jam.
+            </p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <template v-else>
         <ion-list>
           <ion-item>
             <ion-label position="floating">Alamat Lengkap</ion-label>
@@ -50,42 +61,49 @@
           </ion-item>
           <div class="ion-margin-vertical">
             <ion-item class="ion-margin-top">
-              <ion-label position="stacked">Foto KTP</ion-label>
-              <div>
+              <div class="flex-col">
+                <ion-label>Foto KTP</ion-label>
                 <img v-if="ktp.webPath" :src="ktp.webPath" width="200" />
-                <e-a-button
-                  @click="takePhoto('ktp')"
-                  expand="block"
-                  fill="clear"
-                >
-                  Ambil foto
-                </e-a-button>
               </div>
+              <e-a-button
+                slot="end"
+                @click="takePhoto('ktp')"
+                expand="block"
+                fill="clear"
+                class="btn-foto"
+              >
+                Ambil foto
+              </e-a-button>
             </ion-item>
             <ion-item class="ion-margin-top">
-              <ion-label position="stacked">Foto SIM</ion-label>
-              <div>
+              <div class="flex-col">
+                <ion-label>Foto SIM</ion-label>
                 <img v-if="sim.webPath" :src="sim.webPath" width="200" />
-                <e-a-button
-                  @click="takePhoto('sim')"
-                  expand="block"
-                  fill="clear"
-                >
-                  Ambil foto
-                </e-a-button>
               </div>
+              <e-a-button
+                slot="end"
+                @click="takePhoto('sim')"
+                expand="block"
+                fill="clear"
+                class="btn-foto"
+              >
+                Ambil foto
+              </e-a-button>
             </ion-item>
           </div>
-          <e-a-button
-            class="ion-margin-top ion-margin-horizontal"
-            expand="block"
-            color="primary"
-            type="submit"
-          >
-            Kirim
-          </e-a-button>
         </ion-list>
-      </form>
+      </template>
+    </template>
+
+    <template #footer>
+      <e-a-button
+        class="ion-margin"
+        expand="block"
+        color="primary"
+        @click="kirim()"
+      >
+        Kirim
+      </e-a-button>
     </template>
   </app-layout>
 </template>
@@ -99,6 +117,8 @@ import { showDialog } from '@/utils'
 import { HTTP } from '@awesome-cordova-plugins/http'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import {
+  IonCard,
+  IonCardContent,
   IonCol,
   IonGrid,
   IonIcon,
@@ -110,7 +130,7 @@ import {
   IonSelect,
   IonSelectOption,
 } from '@ionic/vue'
-import { checkmarkCircle } from 'ionicons/icons'
+import { alertCircle, checkmarkCircle } from 'ionicons/icons'
 import { onMounted, ref } from 'vue'
 
 const auth = useAuth()
@@ -191,3 +211,16 @@ const kirim = async () => {
   }
 }
 </script>
+
+<style scoped>
+.btn-foto {
+  margin: 0;
+  align-self: center !important;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+</style>
