@@ -90,7 +90,6 @@ const penumpangsSnap = ref<Unsubscribe>()
 const markerLokasi = ref<Marker>()
 
 onMounted(async () => {
-  loadDocument()
   map = new Map({
     container: 'map',
     style: isDark
@@ -104,6 +103,7 @@ onMounted(async () => {
   map.on('load', async () => {
     isLoaded.value = true
     map.resize()
+    await loadDocument()
 
     map.addSource('trayek', {
       type: 'geojson',
@@ -193,9 +193,9 @@ const loadDocument = async () => {
         ])
       }
 
-      await updateDocId(querySnapshot.docs[0].id)
-      await watchPesanan()
-      await watchPenumpang()
+      updateDocId(querySnapshot.docs[0].id)
+      watchPesanan()
+      watchPenumpang()
     } else {
       if (markerLokasi.value) {
         markerLokasi.value.remove()
@@ -295,16 +295,16 @@ const openModalPesanan = async () => {
 }
 
 const updateDocId = async (id: string) => {
-  const res = await patch(`angkot/${authAngkot.id}/doc`, {
+  await patch(`angkot/${authAngkot.id}/doc`, {
     docId: id,
   })
-  console.log(res.data)
+  setAngkotDocId(id)
 }
 
 const watchPesanan = async () => {
   const colRef = collection(
     db,
-    `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
+    `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
   )
   const q = query(colRef, where('status', '==', 'pending'))
 
@@ -325,7 +325,7 @@ const watchPesanan = async () => {
 const watchPenumpang = async () => {
   const colRef = collection(
     db,
-    `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
+    `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
   )
   const q = query(
     colRef,
@@ -333,7 +333,6 @@ const watchPenumpang = async () => {
   )
 
   penumpangsSnap.value = onSnapshot(q, (doc) => {
-    console.log(doc.docs)
     const data = doc.docs.map((d) => {
       const data = d.data()
       data.jemput = [data.jemput.longitude, data.jemput.latitude]

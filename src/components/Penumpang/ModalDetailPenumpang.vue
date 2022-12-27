@@ -2,12 +2,12 @@
   <modal-layout title="Detail Penumpang" @start-click="close()">
     <template #content>
       <div class="flex-col fill-container">
-        <MapBox
+        <map-box
           @route-loaded="onRouteLoaded"
           :jemput="penumpang.jemput"
           :tujuan="penumpang.tujuan"
         />
-        <IonModal
+        <ion-modal
           id="modal-sheet-detail"
           ref="modalDetail"
           :is-open="true"
@@ -16,23 +16,23 @@
           :backdrop-dismiss="false"
           :backdrop-breakpoint="0.5"
         >
-          <IonContent class="ion-padding">
+          <ion-content class="ion-padding">
             <h3>Detail Penumpang</h3>
 
-            <IonItem>
-              <IonLabel>Nama</IonLabel>
+            <ion-item>
+              <ion-label>Nama</ion-label>
               <p slot="end">{{ penumpang.user.nama }}</p>
-            </IonItem>
-            <IonItem>
-              <IonLabel>Jarak</IonLabel>
+            </ion-item>
+            <ion-item>
+              <ion-label>Jarak</ion-label>
               <p slot="end">{{ distance }}</p>
-            </IonItem>
-            <IonItem>
-              <IonLabel>Perkiraan waktu</IonLabel>
+            </ion-item>
+            <ion-item>
+              <ion-label>Perkiraan waktu</ion-label>
               <p slot="end">{{ duration }}</p>
-            </IonItem>
+            </ion-item>
             <div class="ion-margin-top">
-              <EAButton
+              <e-a-button
                 @click="
                   penumpang.status == StatusPesanan.PROCESS
                     ? selesaiPenumpang()
@@ -45,10 +45,10 @@
                     ? 'Selesai'
                     : 'Proses'
                 }}
-              </EAButton>
+              </e-a-button>
             </div>
-          </IonContent>
-        </IonModal>
+          </ion-content>
+        </ion-modal>
       </div>
     </template>
   </modal-layout>
@@ -97,7 +97,7 @@ const onRouteLoaded = (route: any) => {
 }
 
 const prosesPenumpang = async () => {
-  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs/${props.penumpang.docId}`
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
@@ -110,7 +110,7 @@ const prosesPenumpang = async () => {
 }
 
 const selesaiPenumpang = async () => {
-  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs/${props.penumpang.docId}`
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
@@ -123,9 +123,8 @@ const selesaiPenumpang = async () => {
 }
 
 const close = async () => {
-  await modalController.dismiss()
-  // await modalController.dismiss(null, null, 'modal-sheet-detail')
-  // await modalController.dismiss(null, null, 'modal-detail-penumpang')
+  await modalController.dismiss(null, null, 'modal-sheet-detail')
+  await modalController.dismiss(null, null, 'modal-detail-penumpang')
 }
 </script>
 

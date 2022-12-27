@@ -39,11 +39,8 @@ export const useAuth = defineStore('auth', {
   actions: {
     setAngkotDocId(id: string) {
       this.docId = id
-      Preferences.remove({ key: 'docId' })
-      Preferences.set({ key: 'docId', value: id })
     },
     async setAuthUser(user: any, token: string = null) {
-      console.log(user)
       this.user = user
 
       await Preferences.remove({ key: 'user' })
