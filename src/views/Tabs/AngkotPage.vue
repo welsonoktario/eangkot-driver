@@ -43,7 +43,7 @@
           <ion-item>
             <div class="flex-col">
               <h2>Rute Kembali</h2>
-              <p class="item-p">{{ trayek.rutePulang }}</p>
+              <p class="item-p">{{ trayek.ruteKembali }}</p>
             </div>
           </ion-item>
         </ion-card-content>

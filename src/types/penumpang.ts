@@ -1,3 +1,4 @@
+import { Timestamp } from '@firebase/firestore'
 import { LngLatLike } from 'mapbox-gl'
 import { StatusPesanan } from './statusPesanan'
 import { User } from './user'
@@ -8,4 +9,5 @@ export type Penumpang = {
   tujuan: LngLatLike
   status: StatusPesanan
   user: User
+  timestamp: Timestamp
 }

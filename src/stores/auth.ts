@@ -9,6 +9,7 @@ type AuthState = {
   user: User | undefined
   token: string | undefined
   driver: number | undefined
+  rating: number | null
   angkot: Angkot | undefined
   docId: string
 }
@@ -25,6 +26,7 @@ export const useAuth = defineStore('auth', {
       user: undefined,
       token: undefined,
       driver: undefined,
+      rating: null,
       angkot: undefined,
       docId: '',
     } as AuthState),
@@ -40,8 +42,9 @@ export const useAuth = defineStore('auth', {
     setAngkotDocId(id: string) {
       this.docId = id
     },
-    async setAuthUser(user: any, token: string = null) {
+    async setAuthUser(user: any, token: string = null, rating: number = null) {
       this.user = user
+      this.rating = rating
 
       await Preferences.remove({ key: 'user' })
       await Preferences.set({ key: 'user', value: JSON.stringify(this.user) })
@@ -51,23 +54,6 @@ export const useAuth = defineStore('auth', {
         this.angkot = user.driver?.angkot
         this.docId = user.driver?.angkot?.docId
       }
-
-      /* if (user.driver) {
-        this.driver = user.driver.id
-        this.angkot = user.driver.angkot
-
-        await Preferences.remove({ key: 'driver' })
-        await Preferences.remove({ key: 'angkot' })
-
-        await Preferences.set({
-          key: 'driver',
-          value: JSON.stringify(this.driver),
-        })
-        await Preferences.set({
-          key: 'angkot',
-          value: JSON.stringify(this.angkot),
-        })
-      } */
 
       if (token) {
         this.token = token

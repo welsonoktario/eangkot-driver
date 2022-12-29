@@ -1,18 +1,25 @@
-import { PesananFB as Pesanan, StatusPesanan } from '@/types'
+import { Penumpang, PesananFB as Pesanan, StatusPesanan } from '@/types'
+import { Marker } from 'mapbox-gl'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
 type PenumpangsState = {
   _penumpangs: Pesanan[]
+  _markersJemput: Marker[]
+  _markersTujuan: Marker[]
 }
 
 export const usePenumpangs = defineStore('penumpangs', {
   state: () =>
     reactive<PenumpangsState>({
       _penumpangs: [],
+      _markersJemput: [],
+      _markersTujuan: [],
     }),
   getters: {
     penumpangs: (state) => state._penumpangs,
+    markersJemput: (state) => state._markersJemput,
+    markersTujuan: (state) => state._markersTujuan,
   },
   actions: {
     setPenumpangs(penumpangs: Pesanan[]) {
@@ -31,6 +38,17 @@ export const usePenumpangs = defineStore('penumpangs', {
       this._penumpangs = this._penumpangs.filter(
         (p: Pesanan) => p.docId !== penumpang.docId
       )
+    },
+    updateMarkers() {
+      this._markersJemput.forEach((marker: Marker) => marker.remove())
+      this._markersTujuan.forEach((marker: Marker) => marker.remove())
+
+      this._markersJemput = (this._penumpangs as Penumpang[])
+        .filter((penumpang) => penumpang.status === StatusPesanan.ACCEPT)
+        .map((penumpang) => new Marker().setLngLat(penumpang.jemput))
+      this._markersTujuan = (this._penumpangs as Penumpang[])
+        .filter((penumpang) => penumpang.status === StatusPesanan.PROCESS)
+        .map((penumpang) => new Marker().setLngLat(penumpang.jemput))
     },
   },
 })

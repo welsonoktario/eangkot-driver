@@ -42,8 +42,8 @@
               >
                 {{
                   penumpang.status == StatusPesanan.PROCESS
-                    ? 'Selesai'
-                    : 'Proses'
+                    ? 'Selesaikan Pesanan'
+                    : 'Tiba di Titik Jemput'
                 }}
               </e-a-button>
             </div>

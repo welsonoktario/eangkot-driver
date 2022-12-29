@@ -72,7 +72,7 @@ import { power, receipt } from 'ionicons/icons'
 import { GeolocateControl, Map, Marker } from 'mapbox-gl'
 import { computed, inject, onMounted, ref } from 'vue'
 
-const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId } =
+const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId, rating } =
   useAuth()
 const pesanan = usePesanan()
 const penumpangs = usePenumpangs()
@@ -103,7 +103,10 @@ onMounted(async () => {
   map.on('load', async () => {
     isLoaded.value = true
     map.resize()
-    await loadDocument()
+
+    if (authAngkot) {
+      await loadDocument()
+    }
 
     map.addSource('trayek', {
       type: 'geojson',
@@ -202,6 +205,7 @@ const loadDocument = async () => {
       }
     }
   } catch (e: any) {
+    console.log(e)
     await showToast('Terjadi kesalahan memuat data angkot', 'danger')
   }
 }
@@ -228,6 +232,7 @@ const setOnline = async () => {
           id: authDriver,
           nama: authUser.nama,
           noHp: authUser.noHp,
+          rating: rating ?? 0,
         },
         noKendaraan: authAngkot.noKendaraan,
         lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
@@ -257,6 +262,7 @@ const setOnline = async () => {
         }
       )
     } catch (e: any) {
+      console.error(e)
       await showToast('Terjadi kesalahan mengaktifkan angkot', 'danger')
     }
   } else {
@@ -343,6 +349,12 @@ const watchPenumpang = async () => {
     }) as Pesanan[]
 
     penumpangs.setPenumpangs(data)
+    penumpangs.updateMarkers()
+
+    penumpangs.markersJemput.length &&
+      penumpangs.markersJemput.forEach((marker) => marker.addTo(map))
+    penumpangs.markersTujuan.length &&
+      penumpangs.markersTujuan.forEach((marker) => marker.addTo(map))
   })
 }
 </script>
