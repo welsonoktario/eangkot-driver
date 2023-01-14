@@ -198,7 +198,7 @@ const loadDocument = async () => {
 
       updateDocId(querySnapshot.docs[0].id)
       watchPesanan()
-      watchPenumpang()
+      // watchPenumpang()
     } else {
       if (markerLokasi.value) {
         markerLokasi.value.remove()
@@ -312,23 +312,36 @@ const watchPesanan = async () => {
     db,
     `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
   )
-  const q = query(colRef, where('status', '==', 'pending'))
 
-  pesanansSnap.value = onSnapshot(q, (doc) => {
-    const data = doc.docs.map((d) => {
-      const data = d.data()
+  pesanansSnap.value = onSnapshot(colRef, (snapshot) => {
+    let pesanansTmp = []
+    let penumpangsTmp = []
+
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data()
       data.jemput = [data.jemput.longitude, data.jemput.latitude]
       data.tujuan = [data.tujuan.longitude, data.tujuan.latitude]
-      data.docId = d.id
+      data.docId = doc.id
 
-      return data
-    }) as Pesanan[]
+      if (data.status == StatusPesanan.PENDING) {
+        pesanansTmp.push(data)
+      } else if (data.status == StatusPesanan.ACCEPT || data.status == StatusPesanan.PROCESS) {
+        penumpangsTmp.push(data)
+      }
+    })
 
-    pesanan.setPesanans(data)
+    pesanan.setPesanans(pesanansTmp)
+    penumpangs.setPenumpangs(penumpangsTmp)
+    penumpangs.updateMarkers()
+
+    penumpangs.markersJemput.length &&
+      penumpangs.markersJemput.forEach((marker) => marker.addTo(map))
+    penumpangs.markersTujuan.length &&
+      penumpangs.markersTujuan.forEach((marker) => marker.addTo(map))
   })
 }
 
-const watchPenumpang = async () => {
+/* const watchPenumpang = async () => {
   const colRef = collection(
     db,
     `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
@@ -356,7 +369,7 @@ const watchPenumpang = async () => {
     penumpangs.markersTujuan.length &&
       penumpangs.markersTujuan.forEach((marker) => marker.addTo(map))
   })
-}
+} */
 </script>
 
 <style lang="scss" scoped>
