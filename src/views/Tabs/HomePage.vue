@@ -54,6 +54,8 @@ import {
   loadingController,
   modalController,
 } from '@ionic/vue'
+import buffer from '@turf/buffer'
+import { MultiLineString } from '@turf/helpers'
 import {
   addDoc,
   collection,
@@ -69,7 +71,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { power, receipt } from 'ionicons/icons'
-import { GeolocateControl, Map, Marker } from 'mapbox-gl'
+import { GeolocateControl, LngLatBounds, Map, Marker } from 'mapbox-gl'
 import { computed, inject, onMounted, ref } from 'vue'
 
 const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId, rating } =
@@ -79,22 +81,25 @@ const penumpangs = usePenumpangs()
 const db: Firestore = inject('db')
 
 let map: Map
+const el = document.createElement('div')
+el.className = 'marker-angkot'
+
 const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 const isLoaded = ref(false)
 const isDark =
   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 const isActive = ref(false)
-const driverSnap = ref<Unsubscribe>()
 const pesanansSnap = ref<Unsubscribe>()
 const penumpangsSnap = ref<Unsubscribe>()
 const markerLokasi = ref<Marker>()
+const watch = ref<any>()
 
 onMounted(async () => {
   map = new Map({
     container: 'map',
     style: isDark
-      ? 'mapbox://styles/mapbox/navigation-night-v1'
-      : 'mapbox://styles/mapbox/navigation-day-v1', // style URL
+      ? 'mapbox://styles/mapbox/dark-v11'
+      : 'mapbox://styles/mapbox/light-v11', // style URL
     center: [112.7518702, -7.2621774], // starting position [lng, lat]
     zoom: 13, // starting zoom
     accessToken,
@@ -104,18 +109,7 @@ onMounted(async () => {
     isLoaded.value = true
     map.resize()
 
-    if (authAngkot) {
-      await loadDocument()
-    }
-
     map.addSource('trayek', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: [],
-      },
-    })
-    map.addSource('route', {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
@@ -135,19 +129,11 @@ onMounted(async () => {
         'line-width': 2,
       },
     })
-    map.addLayer({
-      id: 'route',
-      type: 'line',
-      source: 'route',
-      layout: {
-        'line-join': 'round',
-        'line-cap': 'round',
-      },
-      paint: {
-        'line-color': '#000',
-        'line-width': 2,
-      },
-    })
+
+    if (authAngkot) {
+      await loadTrayekRoute()
+      await loadDocument()
+    }
   })
 
   map.addControl(new GeolocateControl(), 'bottom-right')
@@ -182,7 +168,7 @@ const loadDocument = async () => {
       isActive.value = true
 
       if (!markerLokasi.value) {
-        markerLokasi.value = new Marker()
+        markerLokasi.value = new Marker(el)
           .setLngLat([lokasi.longitude, lokasi.latitude])
           .addTo(map)
         map.flyTo({
@@ -197,8 +183,9 @@ const loadDocument = async () => {
       }
 
       updateDocId(querySnapshot.docs[0].id)
-      watchPesanan()
-      // watchPenumpang()
+      await watchPesanan()
+      await watchPenumpang()
+      await watchLocation(querySnapshot.docs[0].id)
     } else {
       if (markerLokasi.value) {
         markerLokasi.value.remove()
@@ -211,7 +198,6 @@ const loadDocument = async () => {
 }
 
 const setOnline = async () => {
-  let watch: any
   const loading = await loadingController.create({
     animated: true,
     message: 'Loading...',
@@ -240,9 +226,17 @@ const setOnline = async () => {
 
       setAngkotDocId(adr.id)
       isActive.value = true
-      const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, adr.id)
 
-      markerLokasi.value = new Marker()
+      const el = document.createElement('div')
+      const width = 24
+      const height = 24
+      el.className = 'marker'
+      el.style.backgroundImage = `url(https://placekitten.com/g/${width}/${height}/)`
+      el.style.width = `${width}px`
+      el.style.height = `${height}px`
+      el.style.backgroundSize = '100%'
+
+      markerLokasi.value = new Marker(el)
         .setLngLat([lokasi.longitude, lokasi.latitude])
         .addTo(map)
       map.flyTo({
@@ -250,17 +244,7 @@ const setOnline = async () => {
         center: markerLokasi.value.getLngLat(),
       })
 
-      watch = await Geolocation.watchPosition(
-        { enableHighAccuracy: true, timeout: 1000 },
-        (pos) => {
-          if (pos) {
-            const lokasi = pos.coords
-            updateDoc(docRef, {
-              lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
-            })
-          }
-        }
-      )
+      watchLocation(adr.id)
     } catch (e: any) {
       console.error(e)
       await showToast('Terjadi kesalahan mengaktifkan angkot', 'danger')
@@ -281,7 +265,7 @@ const setOnline = async () => {
       } else {
         await deleteDoc(doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId))
 
-        watch && (await Geolocation.clearWatch({ id: watch }))
+        watch.value && (await Geolocation.clearWatch({ id: watch.value }))
         isActive.value = false
       }
     } catch (e: any) {
@@ -307,6 +291,31 @@ const updateDocId = async (id: string) => {
   setAngkotDocId(id)
 }
 
+const watchLocation = async (id: string = null) => {
+  const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, id ?? authDocId)
+
+  watch.value = await Geolocation.watchPosition(
+    { enableHighAccuracy: true, timeout: 1000 },
+    (pos) => {
+      if (pos) {
+        const lokasi = pos.coords
+
+        if (markerLokasi.value) {
+          markerLokasi.value.setLngLat([lokasi.longitude, lokasi.latitude])
+        } else {
+          markerLokasi.value = new Marker(el)
+            .setLngLat([lokasi.longitude, lokasi.latitude])
+            .addTo(map)
+        }
+
+        updateDoc(docRef, {
+          lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
+        })
+      }
+    }
+  )
+}
+
 const watchPesanan = async () => {
   const colRef = collection(
     db,
@@ -325,7 +334,10 @@ const watchPesanan = async () => {
 
       if (data.status == StatusPesanan.PENDING) {
         pesanansTmp.push(data)
-      } else if (data.status == StatusPesanan.ACCEPT || data.status == StatusPesanan.PROCESS) {
+      } else if (
+        data.status == StatusPesanan.ACCEPT ||
+        data.status == StatusPesanan.PROCESS
+      ) {
         penumpangsTmp.push(data)
       }
     })
@@ -341,7 +353,7 @@ const watchPesanan = async () => {
   })
 }
 
-/* const watchPenumpang = async () => {
+const watchPenumpang = async () => {
   const colRef = collection(
     db,
     `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
@@ -369,7 +381,30 @@ const watchPesanan = async () => {
     penumpangs.markersTujuan.length &&
       penumpangs.markersTujuan.forEach((marker) => marker.addTo(map))
   })
-} */
+}
+
+const loadTrayekRoute = async () => {
+  const rute = await import(`../../assets/rute-${authAngkot.trayek.kode}.json`)
+
+  const buffered = buffer(rute.geometry as MultiLineString, 25, {
+    units: 'meters',
+  })
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  map.getSource('trayek').setData(buffered)
+  const bounds = new LngLatBounds()
+
+  rute.geometry.coordinates.forEach((feature: any) => {
+    feature.forEach((f: any) => {
+      bounds.extend(f)
+    })
+  })
+
+  map.fitBounds(bounds, {
+    padding: 32,
+  })
+}
 </script>
 
 <style lang="scss" scoped>

@@ -86,8 +86,13 @@ export const useAuth = defineStore('auth', {
         }
       })
 
+      if (this.user?.driver) {
+        this.driver = this.user.driver
+        this.angkot = this.driver?.angkot
+        this.docId = this.driver?.angkot?.docId
+      }
+
       if (this.user && !this.user.driver) {
-        console.log(this.user)
         authStatus.driver = AuthStatus.PENGAJUAN
       }
 

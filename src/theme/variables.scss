@@ -310,3 +310,27 @@ ion-spinner {
   flex: 1;
   letter-spacing: -0.05rem;
 }
+
+.marker-angkot {
+  background-image: url('/assets/img/angkot.svg');
+  width: 24px;
+  height: 34px;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.marker-jemput {
+  background-image: url('/assets/img/jemput.svg');
+  width: 24px;
+  height: 34px;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.marker-tujuan {
+  background-image: url('/assets/img/jemput.svg');
+  width: 24px;
+  height: 34px;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}

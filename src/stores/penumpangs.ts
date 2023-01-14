@@ -9,6 +9,12 @@ type PenumpangsState = {
   _markersTujuan: Marker[]
 }
 
+const markerJemput = document.createElement('div')
+markerJemput.className = 'marker-jemput'
+
+const markersTujuan = document.createElement('div')
+markersTujuan.className = 'marker-tujuan'
+
 export const usePenumpangs = defineStore('penumpangs', {
   state: () =>
     reactive<PenumpangsState>({
@@ -45,10 +51,14 @@ export const usePenumpangs = defineStore('penumpangs', {
 
       this._markersJemput = (this._penumpangs as Penumpang[])
         .filter((penumpang) => penumpang.status === StatusPesanan.ACCEPT)
-        .map((penumpang) => new Marker().setLngLat(penumpang.jemput))
+        .map((penumpang) =>
+          new Marker(markerJemput).setLngLat(penumpang.jemput)
+        )
       this._markersTujuan = (this._penumpangs as Penumpang[])
         .filter((penumpang) => penumpang.status === StatusPesanan.PROCESS)
-        .map((penumpang) => new Marker().setLngLat(penumpang.jemput))
+        .map((penumpang) =>
+          new Marker(markersTujuan).setLngLat(penumpang.jemput)
+        )
     },
   },
 })
