@@ -12,11 +12,12 @@
     "allowJs": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["vite/client"],
+    "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["src/*"]
     },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "noEmit": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
   "exclude": ["node_modules"]

@@ -93,6 +93,7 @@ const pesanansSnap = ref<Unsubscribe>()
 const penumpangsSnap = ref<Unsubscribe>()
 const markerLokasi = ref<Marker>()
 const watch = ref<any>()
+const docId = ref('')
 
 onMounted(async () => {
   map = new Map({
@@ -215,7 +216,7 @@ const setOnline = async () => {
       const adr = await addDoc(colRef, {
         id: authAngkot.id,
         driver: {
-          id: authDriver,
+          id: authDriver.id,
           nama: authUser.nama,
           noHp: authUser.noHp,
           rating: rating ?? 0,
@@ -225,16 +226,11 @@ const setOnline = async () => {
       })
 
       setAngkotDocId(adr.id)
+      docId.value = adr.id
       isActive.value = true
 
       const el = document.createElement('div')
-      const width = 24
-      const height = 24
-      el.className = 'marker'
-      el.style.backgroundImage = `url(https://placekitten.com/g/${width}/${height}/)`
-      el.style.width = `${width}px`
-      el.style.height = `${height}px`
-      el.style.backgroundSize = '100%'
+      el.className = 'marker-angkot'
 
       markerLokasi.value = new Marker(el)
         .setLngLat([lokasi.longitude, lokasi.latitude])
@@ -263,10 +259,13 @@ const setOnline = async () => {
       if (!snapshots.empty) {
         alert('Tidak dapat menonaktifkan angkot. Masih terdapat ada penumpang')
       } else {
-        await deleteDoc(doc(db, `angkots-${authAngkot.trayek.kode}`, authDocId))
-
-        watch.value && (await Geolocation.clearWatch({ id: watch.value }))
-        isActive.value = false
+        console.log(docId.value)
+        deleteDoc(
+          doc(db, `angkots-${authAngkot.trayek.kode}/${docId.value}`)
+        ).then(async () => {
+          watch.value && (await Geolocation.clearWatch({ id: watch.value }))
+          isActive.value = false
+        })
       }
     } catch (e: any) {
       await showToast('Terjadi kesalahan menonaktifkan angkot', 'danger')
@@ -289,6 +288,7 @@ const updateDocId = async (id: string) => {
     docId: id,
   })
   setAngkotDocId(id)
+  docId.value = id
 }
 
 const watchLocation = async (id: string = null) => {

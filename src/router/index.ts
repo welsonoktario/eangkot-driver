@@ -83,7 +83,7 @@ router.beforeEach(async (to, from) => {
   if (!to.name.toString().includes('auth.')) {
     const { user, driver } = await auth.checkAuthStatus()
 
-    if (user !== AuthStatus.LOGGED_ID) {
+    if (user !== AuthStatus.LOGGED_IN) {
       return { name: 'auth.login' }
     } else {
       if (driver === AuthStatus.PENGAJUAN) {

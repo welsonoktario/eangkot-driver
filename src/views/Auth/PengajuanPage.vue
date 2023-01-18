@@ -5,40 +5,57 @@
     </template>
 
     <template #content>
-      <IonCard color="primary" class="ion-text-center">
-        <IonCardContent>
+      <ion-card v-if="!statusPengajuan" color="primary" class="ion-text-center">
+        <ion-card-content>
           <ion-icon size="large" :icon="alertCircle"></ion-icon>
           <h3 color="primary">
             Sebelum dapat menggunakan aplikasi, anda harus mengajukan permohonan
             menjadi pengemudi angkot.
           </h3>
-        </IonCardContent>
-      </IonCard>
+        </ion-card-content>
+      </ion-card>
 
-      <ion-grid
-        style="height: 100%"
-        class="ion-margin-horizontal"
-        v-if="terkirim"
+      <ion-card
+        v-if="statusPengajuan === 'Ditolak'"
+        color="danger"
+        class="ion-text-center"
       >
-        <ion-row
-          style="height: 100%"
-          class="ion-justify-content-center ion-align-items-center"
-        >
-          <ion-col>
-            <ion-icon
-              :name="checkmarkCircle"
-              size="large"
-              color="primary"
-            ></ion-icon>
-            <p>
-              Pengajuan berhasil dikirim. Proses pengajuan akan diproses selama
-              maksimal 3x24 jam.
-            </p>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+        <ion-card-content>
+          <ion-icon size="large" :icon="closeCircle"></ion-icon>
+          <h3 color="primary">
+            Pengajuan anda ditolak, silahkan ajukan kembali permohonan anda.
+          </h3>
+        </ion-card-content>
+      </ion-card>
 
-      <template v-else>
+      <ion-card
+        v-if="statusPengajuan === 'Pending'"
+        color="primary"
+        class="ion-text-center"
+      >
+        <ion-card-content>
+          <ion-icon size="large" :icon="alertCircle"></ion-icon>
+          <h3 color="primary">
+            Pengajuan berhasil dikirim. Proses pengajuan akan diproses selama
+            maksimal 3x24 jam.
+          </h3>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card
+        v-if="statusPengajuan === 'Diterima'"
+        color="primary"
+        class="ion-text-center"
+      >
+        <ion-card-content>
+          <ion-icon size="large" :icon="checkmarkCircle"></ion-icon>
+          <h3 color="primary">
+            Pengajuan anda telah diterima! Selamat menggunakan aplikasi.
+          </h3>
+        </ion-card-content>
+      </ion-card>
+
+      <template v-if="!statusPengajuan || statusPengajuan === 'Ditolak'">
         <ion-list>
           <ion-item>
             <ion-label position="floating">Alamat Lengkap</ion-label>
@@ -53,8 +70,8 @@
             <ion-select v-model="form.trayek">
               <ion-select-option
                 v-for="t in trayek.trayeks"
-                :key="t.id"
-                :value="t.kode"
+                :key="t.kode"
+                :value="t.id"
                 >{{ t.kode }}</ion-select-option
               >
             </ion-select>
@@ -97,12 +114,22 @@
 
     <template #footer>
       <e-a-button
+        v-if="!statusPengajuan || statusPengajuan == 'Ditolak'"
         class="ion-margin"
         expand="block"
         color="primary"
         @click="kirim()"
       >
         Kirim
+      </e-a-button>
+      <e-a-button
+        v-if="statusPengajuan == 'Diterima'"
+        class="ion-margin"
+        expand="block"
+        color="primary"
+        @click="mulai()"
+      >
+        Mulai
       </e-a-button>
     </template>
   </app-layout>
@@ -112,6 +139,7 @@
 import AppBar from '@/components/AppBar.vue'
 import EAButton from '@/components/EAButton.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { API_URL, get } from '@/lib'
 import { useAuth, useTrayek } from '@/stores'
 import { showDialog } from '@/utils'
 import { HTTP } from '@awesome-cordova-plugins/http'
@@ -119,20 +147,19 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import {
   IonCard,
   IonCardContent,
-  IonCol,
-  IonGrid,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonList,
-  IonRow,
   IonSelect,
   IonSelectOption,
+  useIonRouter,
 } from '@ionic/vue'
-import { alertCircle, checkmarkCircle } from 'ionicons/icons'
+import { alertCircle, checkmarkCircle, closeCircle } from 'ionicons/icons'
 import { onMounted, ref } from 'vue'
 
+const router = useIonRouter()
 const auth = useAuth()
 const trayek = useTrayek()
 const ktp = ref({
@@ -147,15 +174,33 @@ const form = ref({
   alamat: '',
   trayek: '',
 })
-const terkirim = ref(false)
+const statusPengajuan = ref('')
 type PhotoType = 'ktp' | 'sim'
 
-onMounted(async () => await trayek.loadTrayeks())
+onMounted(async () => {
+  await loadPengajuan()
+  await trayek.loadTrayeks()
+})
+
+const loadPengajuan = async () => {
+  try {
+    const res = await get(`driver/${auth.authUser.id}`)
+    const data = await res.data
+
+    if (data.status == 'OK') {
+      statusPengajuan.value = data.data.pengajuan.status
+      delete data.data.pengajuan
+      auth.setAuthUser(data.data, auth.authToken, 0.0)
+    }
+  } catch (e: any) {
+    console.error(e)
+  }
+}
 
 const takePhoto = async (type: PhotoType) => {
   const img = await Camera.getPhoto({
-    quality: 40,
-    allowEditing: true,
+    quality: 50,
+    allowEditing: false,
     source: CameraSource.Camera,
     resultType: CameraResultType.Uri,
   })
@@ -174,28 +219,30 @@ const takePhoto = async (type: PhotoType) => {
 }
 
 const kirim = async () => {
-  const url = import.meta.env.VITE_API_URL
+  const url = API_URL + 'driver'
   const filePaths = [ktp.value.filePath, sim.value.filePath]
   const names = ['ktp', 'sim']
 
   try {
     const res = await HTTP.uploadFile(
       url,
-      form.value,
+      {
+        alamat: String(form.value.alamat),
+        trayek: String(form.value.trayek),
+      },
       {
         Accept: 'application/json',
-        Authorization: auth.authToken,
+        Authorization: `Bearer ${auth.authToken}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       filePaths,
       names
     )
 
-    console.log(res)
-    const data = res.data
+    const data = JSON.parse(res.data)
 
     if (data.status === 'OK') {
-      terkirim.value = true
+      statusPengajuan.value = 'Pending'
     } else if (data.status === 'FAIL') {
       await showDialog({
         title: 'Error',
@@ -209,6 +256,10 @@ const kirim = async () => {
       message: e.data.msg,
     })
   }
+}
+
+const mulai = async () => {
+  router.navigate('/tabs/home', 'root', 'replace')
 }
 </script>
 

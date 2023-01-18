@@ -1,4 +1,5 @@
 export * from './angkot'
+export * from './driver'
 export * from './penumpang'
 export * from './pesanan'
 export * from './statusPesanan'

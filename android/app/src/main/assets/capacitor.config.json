@@ -1,9 +1,14 @@
 {
 	"appId": "com.eangkot.driver",
 	"appName": "eAngkot Driver",
-	"webDir": "public",
+	"webDir": "dist",
 	"bundledWebRuntime": false,
 	"server": {
 		"cleartext": true
+	},
+	"plugins": {
+		"CapacitorHttp": {
+			"enabled": true
+		}
 	}
 }

@@ -1,5 +1,5 @@
 import { patch, post } from '@/lib/http'
-import { Angkot } from '@/types'
+import { Angkot, Driver } from '@/types'
 import { User } from '@/types/user'
 import { Preferences } from '@capacitor/preferences'
 import { defineStore } from 'pinia'
@@ -8,15 +8,15 @@ import { reactive } from 'vue'
 type AuthState = {
   user: User | undefined
   token: string | undefined
-  driver: number | undefined
+  driver: Driver | undefined
   rating: number | null
   angkot: Angkot | undefined
   docId: string
 }
 
 export enum AuthStatus {
-  NOT_LOGGED_ID = 'not-logged-in',
-  LOGGED_ID = 'logged-id',
+  NOT_LOGGED_IN = 'not-logged-in',
+  LOGGED_IN = 'logged-in',
   PENGAJUAN = 'pengajuan',
 }
 
@@ -64,8 +64,8 @@ export const useAuth = defineStore('auth', {
     },
     async checkAuthStatus() {
       const authStatus = {
-        user: AuthStatus.LOGGED_ID,
-        driver: AuthStatus.LOGGED_ID,
+        user: AuthStatus.LOGGED_IN,
+        driver: AuthStatus.LOGGED_IN,
       }
 
       const keys = ['user', 'token']
@@ -82,7 +82,7 @@ export const useAuth = defineStore('auth', {
         if (value && value !== 'null') {
           key === 'user' ? (this[key] = JSON.parse(value)) : (this[key] = value)
         } else {
-          authStatus.user = AuthStatus.NOT_LOGGED_ID
+          authStatus.user = AuthStatus.NOT_LOGGED_IN
         }
       })
 
