@@ -141,6 +141,7 @@ import EAButton from '@/components/EAButton.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { API_URL, get } from '@/lib'
 import { useAuth, useTrayek } from '@/stores'
+import { User } from '@/types'
 import { showDialog } from '@/utils'
 import { HTTP } from '@awesome-cordova-plugins/http'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
@@ -175,6 +176,8 @@ const form = ref({
   trayek: '',
 })
 const statusPengajuan = ref('')
+const user = ref<User>()
+
 type PhotoType = 'ktp' | 'sim'
 
 onMounted(async () => {
@@ -187,10 +190,11 @@ const loadPengajuan = async () => {
     const res = await get(`driver/${auth.authUser.id}`)
     const data = await res.data
 
-    if (data.status == 'OK') {
+    if (data.status == 'OK' && !!data.data.pengajuan) {
       statusPengajuan.value = data.data.pengajuan.status
       delete data.data.pengajuan
       auth.setAuthUser(data.data, auth.authToken, 0.0)
+      user.value = data.data
     }
   } catch (e: any) {
     console.error(e)
@@ -223,37 +227,29 @@ const kirim = async () => {
   const filePaths = [ktp.value.filePath, sim.value.filePath]
   const names = ['ktp', 'sim']
 
-  try {
-    const res = await HTTP.uploadFile(
-      url,
-      {
-        alamat: String(form.value.alamat),
-        trayek: String(form.value.trayek),
-      },
-      {
-        Accept: 'application/json',
-        Authorization: `Bearer ${auth.authToken}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      filePaths,
-      names
-    )
+  const res = await HTTP.uploadFile(
+    url,
+    {
+      alamat: String(form.value.alamat),
+      trayek: String(form.value.trayek),
+      user: String(auth.authUser.id),
+    },
+    {
+      Accept: 'application/json',
+      Authorization: `Bearer ${auth.authToken}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    filePaths,
+    names
+  )
 
-    const data = JSON.parse(res.data)
-
-    if (data.status === 'OK') {
-      statusPengajuan.value = 'Pending'
-    } else if (data.status === 'FAIL') {
-      await showDialog({
-        title: 'Error',
-        message: data.msg,
-      })
-    }
-  } catch (e: any) {
-    console.log(e)
+  if (res.status !== 500) {
+    statusPengajuan.value = 'Pending'
+  } else if (res.status === 500) {
+    const error = JSON.parse(res.error)
     await showDialog({
       title: 'Error',
-      message: e.data.msg,
+      message: error.msg,
     })
   }
 }
