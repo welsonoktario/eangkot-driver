@@ -184,8 +184,8 @@ const loadDocument = async () => {
       }
 
       updateDocId(querySnapshot.docs[0].id)
-      await watchPesanan()
-      await watchPenumpang()
+      await watchPesanan(querySnapshot.docs[0].id)
+      await watchPenumpang(querySnapshot.docs[0].id)
       await watchLocation(querySnapshot.docs[0].id)
     } else {
       if (markerLokasi.value) {
@@ -241,6 +241,7 @@ const setOnline = async () => {
       })
 
       watchLocation(adr.id)
+      await watchPesanan(adr.id)
     } catch (e: any) {
       console.error(e)
       await showToast('Terjadi kesalahan mengaktifkan angkot', 'danger')
@@ -259,7 +260,6 @@ const setOnline = async () => {
       if (!snapshots.empty) {
         alert('Tidak dapat menonaktifkan angkot. Masih terdapat ada penumpang')
       } else {
-        console.log(docId.value)
         deleteDoc(
           doc(db, `angkots-${authAngkot.trayek.kode}/${docId.value}`)
         ).then(async () => {
@@ -316,10 +316,10 @@ const watchLocation = async (id: string = null) => {
   )
 }
 
-const watchPesanan = async () => {
+const watchPesanan = async (docId: string = null) => {
   const colRef = collection(
     db,
-    `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
+    `angkots-${authAngkot.trayek.kode}/${docId || authDocId}/penumpangs`
   )
 
   pesanansSnap.value = onSnapshot(colRef, (snapshot) => {
@@ -353,10 +353,10 @@ const watchPesanan = async () => {
   })
 }
 
-const watchPenumpang = async () => {
+const watchPenumpang = async (docId: string = null) => {
   const colRef = collection(
     db,
-    `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs`
+    `angkots-${authAngkot.trayek.kode}/${docId || authDocId}/penumpangs`
   )
   const q = query(
     colRef,

@@ -97,7 +97,7 @@ const onRouteLoaded = (route: any) => {
 }
 
 const handlePesanan = async (aksi: StatusPesanan) => {
-  const docPath = `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs/${props.pesanan.docId}`
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.pesanan.docId}`
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
