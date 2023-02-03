@@ -2,53 +2,58 @@
   <modal-layout title="Detail Pesanan" @start-click="close()">
     <template #content>
       <div class="flex-col fill-container">
-        <MapBox
+        <map-box
           @route-loaded="onRouteLoaded"
           :jemput="pesanan.jemput"
           :tujuan="pesanan.tujuan"
         />
-        <IonModal
+        <ion-modal
           id="modal-sheet-detail"
           ref="modalDetail"
           :is-open="true"
           :initial-breakpoint="0.35"
-          :breakpoints="[0.1, 0.35]"
+          :breakpoints="[0.1, 0.35, 1]"
           :backdrop-dismiss="false"
           :backdrop-breakpoint="0.5"
         >
-          <IonContent class="ion-padding">
+          <ion-content class="ion-padding">
             <h3>Detail Pesanan</h3>
 
-            <IonItem>
-              <IonLabel>Nama</IonLabel>
+            <ion-item>
+              <ion-label>Nama</ion-label>
               <p slot="end">{{ pesanan.user.nama }}</p>
-            </IonItem>
-            <IonItem>
-              <IonLabel>Jarak</IonLabel>
+            </ion-item>
+            <ion-item :href="whatsAppUrl" button detail>
+              <ion-icon :icon="logoWhatsapp" color="primary" slot="start" />
+              <ion-label>No. HP</ion-label>
+              <p>{{ pesanan.user.noHp }}</p>
+            </ion-item>
+            <ion-item>
+              <ion-label>Jarak</ion-label>
               <p slot="end">{{ distance }}</p>
-            </IonItem>
-            <IonItem>
-              <IonLabel>Perkiraan waktu</IonLabel>
+            </ion-item>
+            <ion-item>
+              <ion-label>Perkiraan waktu</ion-label>
               <p slot="end">{{ duration }}</p>
-            </IonItem>
+            </ion-item>
             <div class="ion-margin-top flex-row justify-between">
-              <EAButton
+              <e-a-button
                 class="flex-grow"
                 color="danger"
                 fill="clear"
                 @click="handlePesanan(StatusPesanan.CANCEL)"
               >
                 Tolak
-              </EAButton>
-              <EAButton
+              </e-a-button>
+              <e-a-button
                 class="flex-grow"
                 @click="handlePesanan(StatusPesanan.ACCEPT)"
               >
                 Terima
-              </EAButton>
+              </e-a-button>
             </div>
-          </IonContent>
-        </IonModal>
+          </ion-content>
+        </ion-modal>
       </div>
     </template>
   </modal-layout>
@@ -70,6 +75,7 @@ import {
   modalController,
 } from '@ionic/vue'
 import { computed } from '@vue/reactivity'
+import { logoWhatsapp } from 'ionicons/icons'
 import { inject, ref } from 'vue'
 
 type PesananDetailProps = {
@@ -82,6 +88,12 @@ const { authAngkot, authDocId } = useAuth()
 const penumpangs = usePenumpangs()
 const modalDetail = ref()
 const routeDetail = ref()
+
+const whatsAppUrl = computed(() => {
+  const number = props.pesanan.user?.noHp.replace('0', '+62')
+
+  return `whatsapp://send?phone=${number}`
+})
 
 const distance = computed(
   () =>
@@ -104,7 +116,7 @@ const handlePesanan = async (aksi: StatusPesanan) => {
     status: aksi,
   })
 
-  aksi == StatusPesanan.ACCEPT && penumpangs.addPenumpang(props.pesanan)
+  // aksi == StatusPesanan.ACCEPT && penumpangs.addPenumpang(props.pesanan)
 
   await close()
 }

@@ -72,10 +72,12 @@ import {
 } from 'firebase/firestore'
 import { power, receipt } from 'ionicons/icons'
 import { GeolocateControl, LngLatBounds, Map, Marker } from 'mapbox-gl'
+import { storeToRefs } from 'pinia'
 import { computed, inject, onMounted, ref } from 'vue'
 
-const { authDriver, authUser, authAngkot, setAngkotDocId, authDocId, rating } =
-  useAuth()
+const auth = useAuth()
+const { authDriver, authUser, authAngkot, authDocId, rating } =
+  storeToRefs(auth)
 const pesanan = usePesanan()
 const penumpangs = usePenumpangs()
 const db: Firestore = inject('db')
@@ -92,7 +94,7 @@ const isActive = ref(false)
 const pesanansSnap = ref<Unsubscribe>()
 const penumpangsSnap = ref<Unsubscribe>()
 const markerLokasi = ref<Marker>()
-const watch = ref<any>()
+const watch = ref<string>()
 const docId = ref('')
 
 onMounted(async () => {
@@ -157,8 +159,8 @@ const loadDocument = async () => {
   const lokasi = geo.coords
 
   const q = query(
-    collection(db, `angkots-${authAngkot.trayek.kode}`),
-    where('id', '==', authAngkot.id)
+    collection(db, `angkots-${authAngkot.value.trayek.kode}`),
+    where('id', '==', authAngkot.value.id)
   )
 
   try {
@@ -183,7 +185,7 @@ const loadDocument = async () => {
         ])
       }
 
-      updateDocId(querySnapshot.docs[0].id)
+      await updateDocId(querySnapshot.docs[0].id)
       await watchPesanan(querySnapshot.docs[0].id)
       await watchPenumpang(querySnapshot.docs[0].id)
       await watchLocation(querySnapshot.docs[0].id)
@@ -193,7 +195,7 @@ const loadDocument = async () => {
       }
     }
   } catch (e: any) {
-    console.log(e)
+    console.error(e)
     await showToast('Terjadi kesalahan memuat data angkot', 'danger')
   }
 }
@@ -212,20 +214,20 @@ const setOnline = async () => {
     const lokasi = geo.coords
 
     try {
-      const colRef = collection(db, `angkots-${authAngkot.trayek.kode}`)
+      const colRef = collection(db, `angkots-${authAngkot.value.trayek.kode}`)
       const adr = await addDoc(colRef, {
-        id: authAngkot.id,
+        id: authAngkot.value.id,
         driver: {
-          id: authDriver.id,
-          nama: authUser.nama,
-          noHp: authUser.noHp,
+          id: authDriver.value.id,
+          nama: authUser.value.nama,
+          noHp: authUser.value.noHp,
           rating: rating ?? 0,
         },
-        noKendaraan: authAngkot.noKendaraan,
+        noKendaraan: authAngkot.value.noKendaraan,
         lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
       })
 
-      setAngkotDocId(adr.id)
+      auth.setAngkotDocId(adr.id)
       docId.value = adr.id
       isActive.value = true
 
@@ -252,7 +254,7 @@ const setOnline = async () => {
     try {
       const colRef = collection(
         db,
-        `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs`
+        `angkots-${authAngkot.value.trayek.kode}/${authDocId.value}/penumpangs`
       )
       const q = query(colRef, where('status', '==', 'pending'))
       const snapshots = await getDocs(q)
@@ -261,7 +263,7 @@ const setOnline = async () => {
         alert('Tidak dapat menonaktifkan angkot. Masih terdapat ada penumpang')
       } else {
         deleteDoc(
-          doc(db, `angkots-${authAngkot.trayek.kode}/${docId.value}`)
+          doc(db, `angkots-${authAngkot.value.trayek.kode}/${docId.value}`)
         ).then(async () => {
           watch.value && (await Geolocation.clearWatch({ id: watch.value }))
           isActive.value = false
@@ -284,42 +286,41 @@ const openModalPesanan = async () => {
 }
 
 const updateDocId = async (id: string) => {
-  await patch(`angkot/${authAngkot.id}/doc`, {
+  auth.setAngkotDocId(id)
+  console.log(auth.docId)
+  await patch(`angkot/${authAngkot.value.id}/doc`, {
     docId: id,
   })
-  setAngkotDocId(id)
   docId.value = id
 }
 
 const watchLocation = async (id: string = null) => {
-  const docRef = doc(db, `angkots-${authAngkot.trayek.kode}`, id ?? authDocId)
+  const docRef = doc(db, `angkots-${authAngkot.value.trayek.kode}`, id ?? authDocId.value)
 
-  watch.value = await Geolocation.watchPosition(
-    { enableHighAccuracy: true, timeout: 1000 },
-    (pos) => {
-      if (pos) {
-        const lokasi = pos.coords
+  watch.value && (await Geolocation.clearWatch({ id: watch.value }))
+  watch.value = await Geolocation.watchPosition(null, (pos) => {
+    if (pos) {
+      const lokasi = pos.coords
 
-        if (markerLokasi.value) {
-          markerLokasi.value.setLngLat([lokasi.longitude, lokasi.latitude])
-        } else {
-          markerLokasi.value = new Marker(el)
-            .setLngLat([lokasi.longitude, lokasi.latitude])
-            .addTo(map)
-        }
-
-        updateDoc(docRef, {
-          lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
-        })
+      if (markerLokasi.value) {
+        markerLokasi.value.setLngLat([lokasi.longitude, lokasi.latitude])
+      } else {
+        markerLokasi.value = new Marker(el)
+          .setLngLat([lokasi.longitude, lokasi.latitude])
+          .addTo(map)
       }
+
+      updateDoc(docRef, {
+        lokasi: new GeoPoint(lokasi.latitude, lokasi.longitude),
+      })
     }
-  )
+  })
 }
 
 const watchPesanan = async (docId: string = null) => {
   const colRef = collection(
     db,
-    `angkots-${authAngkot.trayek.kode}/${docId || authDocId}/penumpangs`
+    `angkots-${authAngkot.value.trayek.kode}/${docId || authDocId.value}/penumpangs`
   )
 
   pesanansSnap.value = onSnapshot(colRef, (snapshot) => {
@@ -356,7 +357,7 @@ const watchPesanan = async (docId: string = null) => {
 const watchPenumpang = async (docId: string = null) => {
   const colRef = collection(
     db,
-    `angkots-${authAngkot.trayek.kode}/${docId || authDocId}/penumpangs`
+    `angkots-${authAngkot.value.trayek.kode}/${docId || authDocId.value}/penumpangs`
   )
   const q = query(
     colRef,
@@ -384,7 +385,7 @@ const watchPenumpang = async (docId: string = null) => {
 }
 
 const loadTrayekRoute = async () => {
-  const rute = await import(`../../assets/rute-${authAngkot.trayek.kode}.json`)
+  const rute = await import(`../../assets/rute-${authAngkot.value.trayek.kode}.json`)
 
   const buffered = buffer(rute.geometry as MultiLineString, 25, {
     units: 'meters',

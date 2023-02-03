@@ -80,7 +80,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const auth = useAuth()
-  if (!to.name.toString().includes('auth.')) {
+  if (to.name.toString().includes('home')) {
     const { user, driver } = await auth.checkAuthStatus()
 
     if (user !== AuthStatus.LOGGED_IN) {

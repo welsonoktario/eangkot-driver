@@ -9,9 +9,9 @@
         <ion-item
           v-for="penumpang in penumpangs"
           :key="`penumpang-${penumpang.docId}`"
+          @click="openModalDetail(penumpang)"
           button
           detail
-          @click="openModalDetail(penumpang)"
         >
           <ion-label>
             <h2>{{ penumpang.user.nama }}</h2>

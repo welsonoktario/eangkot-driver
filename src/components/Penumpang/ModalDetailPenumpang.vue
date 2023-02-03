@@ -8,11 +8,12 @@
           :tujuan="penumpang.tujuan"
         />
         <ion-modal
+          style="z-index: 999999"
           id="modal-sheet-detail"
           ref="modalDetail"
-          :is-open="true"
+          :is-open="isOpen"
           :initial-breakpoint="0.35"
-          :breakpoints="[0.1, 0.35]"
+          :breakpoints="[0.1, 0.35, 1]"
           :backdrop-dismiss="false"
           :backdrop-breakpoint="0.5"
         >
@@ -22,6 +23,11 @@
             <ion-item>
               <ion-label>Nama</ion-label>
               <p slot="end">{{ penumpang.user.nama }}</p>
+            </ion-item>
+            <ion-item :href="whatsAppUrl" button detail>
+              <ion-icon :icon="logoWhatsapp" color="primary" slot="start" />
+              <ion-label>No. HP</ion-label>
+              <p>{{ penumpang.user.noHp }}</p>
             </ion-item>
             <ion-item>
               <ion-label>Jarak</ion-label>
@@ -64,12 +70,14 @@ import { forHumans } from '@/utils/dateUtil'
 import { doc, Firestore, updateDoc } from '@firebase/firestore'
 import {
   IonContent,
+  IonIcon,
   IonItem,
   IonLabel,
   IonModal,
   modalController,
 } from '@ionic/vue'
 import { computed } from '@vue/reactivity'
+import { logoWhatsapp } from 'ionicons/icons'
 import { inject, ref } from 'vue'
 
 type PenumpangDetailProps = {
@@ -82,6 +90,13 @@ const { authAngkot, authDocId } = useAuth()
 const penumpangs = usePenumpangs()
 const modalDetail = ref()
 const routeDetail = ref()
+const isOpen = ref(true)
+
+const whatsAppUrl = computed(() => {
+  const number = props.penumpang.user?.noHp.replace('0', '+62')
+
+  return `whatsapp://send?phone=${number}`
+})
 
 const distance = computed(
   () =>
@@ -94,10 +109,11 @@ const duration = computed(
 
 const onRouteLoaded = (route: any) => {
   routeDetail.value = route
+  isOpen.value = true
 }
 
 const prosesPenumpang = async () => {
-  const docPath = `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs/${props.penumpang.docId}`
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
@@ -110,7 +126,7 @@ const prosesPenumpang = async () => {
 }
 
 const selesaiPenumpang = async () => {
-  const docPath = `angkots-${authAngkot.trayek.kode}/${authAngkot.docId}/penumpangs/${props.penumpang.docId}`
+  const docPath = `angkots-${authAngkot.trayek.kode}/${authDocId}/penumpangs/${props.penumpang.docId}`
   const docRef = doc(db, docPath)
 
   await updateDoc(docRef, {
@@ -123,7 +139,7 @@ const selesaiPenumpang = async () => {
 }
 
 const close = async () => {
-  await modalController.dismiss(null, null, 'modal-sheet-detail')
+  isOpen.value = false
   await modalController.dismiss(null, null, 'modal-detail-penumpang')
 }
 </script>
